@@ -1,7 +1,10 @@
 Qt.moveTo(screen.width - 260, 38);
 Qt.hide();
 var Exec = PHP,
-	executeProc = false;
+	executeProc = false,
+	startKill = false,
+	n = 0
+	;
 
 /*setInterval(function(){
 	if (!executeProc) {
@@ -27,4 +30,16 @@ function onMessage(e) {
 		PHP.exec(Qt.appDir() + '/capslockstate', 'onFinish' );
 		//document.body.innerHTML = e.data;
 	}
+	n++;
+	if (n > 60 && !startKill) {
+		startKill = true;
+		Exec.exec(Qt.appDir() + '/../capslock.sh &', 'onStartNew');
+		setTimeout(function(){
+			Qt.quit();
+		}, 10*1000/*10000*/);
+	}
+}
+
+function onStartNew() {
+	Qt.quit();
 }

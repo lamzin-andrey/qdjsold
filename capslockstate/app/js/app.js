@@ -31,7 +31,7 @@ function onMessage(e) {
 		//document.body.innerHTML = e.data;
 	}
 	n++;
-	if (n > 60 && !startKill) {
+	if (n > 3600 && !startKill) {
 		startKill = true;
 		Exec.exec(Qt.appDir() + '/../capslock.sh &', 'onStartNew');
 		setTimeout(function(){

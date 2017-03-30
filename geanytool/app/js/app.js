@@ -35,6 +35,9 @@ function Camel2Snake() {
 					r += s;
 				}
 			}
+			if (isEnum(a)) {
+				r = namesToPhpArrayDerfinion(a);
+			}
 			$('#out').val(r);
 		}, 100);
 	}
@@ -45,7 +48,29 @@ function Camel2Snake() {
 		return false;
 	}
 	function isSnakeCase(s) {
-		return !isCamelCase(s);
+		return !isCamelCase(s) && !isEnum(s);
+	}
+	function isEnum(s) {
+		if (~s.indexOf(',') || ~s.indexOf(' ')){
+			return true;
+		}
+		return false;
+	}
+	function namesToPhpArrayDerfinion(s) {
+		var sep, a, i, w, r = [];
+		if (~s.indexOf(',')) {
+			sep = ',';
+		} else {
+			sep = /\s+/;
+		}
+		a = s.split(sep);
+		for (i = 0; i < a.length; i++) {
+			w = $.trim(a[i]);
+			if (w) {
+				r.push("'" + w + "' => $" + w);
+			}
+		}
+		return '[' + r.join(', ') + ']';
 	}
 }
 

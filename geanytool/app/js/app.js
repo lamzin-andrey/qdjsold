@@ -2,13 +2,19 @@ function Camel2Snake() {
 	function tpl() {
 		var s = '<input id="in" rows="10" style="width:99%">\
 		<input id="out" type="text" style="width:99%">\
-		<p style="text-align:right">\
+		<p style="text-align:right;margin:0px; padding:0px;">\
 		<input type="button" id="run" value="ok">\
+		</p>\
+		<p style="text-align:left; margin:0px; padding:0px;">\
+		<input type="button" id="menu" value="Menu">\
 		</p>\
 		';
 		$('#console').html(s);
 	}
 	tpl();
+	$('#menu').click(function() {
+		Menu.show();
+	});
 	$('#in').focus();
 	$('#in')[0].onkeydown = function() {
 		setTimeout(function() {

@@ -1,0 +1,6 @@
+html, body {height:100%;}
+body {padding:0px; margin:0px;height:100%; width:100%;}
+.ds {/*background:url('./img/design.png') no-repeat; opacity: 0.5;*/height:100%; width:100%;}
+
+.view {float:left;width:90%;text-align:center;vertical-align:middle;}
+.vioew img {vertical-align:middle;}

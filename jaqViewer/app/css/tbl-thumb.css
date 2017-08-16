@@ -1,8 +1,8 @@
 .thumb {
 	/*background: rgba(255,0,0,0.5);/**/
 	border: 1px colid red;
-	float: left;
 	width: 80px;
+	vertical-align:top;
 }
 .thumb ul li {
 	list-style-type:none;
@@ -11,7 +11,7 @@
 	border:1px solid gray;
 }
 .thumb ul {
-	margin: 0px auto auto 0px;
+	margin: 0px;
 	padding: 0px;
 	overflow-y: scroll;
 	text-align: center;
@@ -25,10 +25,15 @@
 	border:1px solid rgb(161, 188, 192);
 }
 .activeQ {
+	opacity:0;
 	background : rgba(235, 253, 255, 0.7)/*rgba(41, 100, 165, 0.33)*/;
 	z-index:2;
 	top:0px;
 	left:0px;
 	width:100%;
 	height:100%;
+}
+.activeQ:hover, li.active div.activeQ {
+	opacity:1;
+	cursor:pointer;
 }

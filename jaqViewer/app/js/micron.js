@@ -60,23 +60,24 @@ function getViewport() {
 	return {w:w, h:h};
 }
 function appendChild(parent, tag, innerHTML, obj, dataObj) {
-	var e = D.createElement(tag), i;
+	var E = D.createElement(tag), i;
 	if (obj) {
 		for (i in obj) {
 			if (obj[i] instanceof Function) {
-				e[i] =  obj[i];
+				E[i] =  obj[i];
 			} else {
-				e.setAttribute(i, obj[i]);
+				E.setAttribute(i, obj[i]);
 			}
 		}
 	}
 	if (dataObj) {
 		for (i in dataObj) {
-			e.setAttribute('data-' + i, dataObj[i]);
+			E.setAttribute('data-' + i, dataObj[i]);
 		}
 	}
-	e.innerHTML = innerHTML;
-	e(parent).appendChild(e);
+	E.innerHTML = innerHTML;
+	e(parent).appendChild(E);
+	return E;
 }
 function sz(a) {
 	return a.length;

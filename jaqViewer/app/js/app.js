@@ -211,9 +211,8 @@ function onNextClick() {
 		n = 0;
 	}
 	W.currentImgN = n;
-	//W.adjustMode = 0;
-	setCurrentImage(W.data[n]);
 	setActiveThumb();
+	setCurrentImage(W.data[n]);
 }
 function onPrevClick() {
 	var n = --W.currentImgN;
@@ -226,7 +225,7 @@ function onPrevClick() {
 	setActiveThumb();
 }
 function setActiveThumb() {
-	var ls = ee('gallery', 'li'), i, j;
+	var ls = getThumbList(), i, j;
 	for(j = 0; j < ls.length; j++) {
 		o = ls[j];
 		removeClass(o, 'active');
@@ -268,6 +267,16 @@ function zoomPlace (i, wV) {
 		i.style.width = wV.w + 'px';
 		i.style.height = null;
 	}
+}
+function getThumbList() {
+	if (!W.thumbList) {
+		var ls = ee('gallery', 'li'), i;
+		W.thumbList = [];
+		for (i = 0; i < ls.length; i++) {
+			W.thumbList.push(ls[i]);
+		}
+	}
+	return W.thumbList;
 }
 function getFolderImages() {
 	return [

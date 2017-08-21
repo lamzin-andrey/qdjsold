@@ -1,10 +1,42 @@
+function cp(s) {
+	var t = new Date().getTime(), le = log && log.innerHTML;
+	if (!W.tcp) {
+		W.tcp = t;
+		if (le) {
+			log.innerHTML = log.innerHTML + 'Start ' + (t - W.tcp) + "<br>";
+		}
+	} else {
+		if (le) {
+			log.innerHTML = log.innerHTML + s + ' ' + (t - W.tcp) + "<br>";
+		}
+	}
+	
+}
 window.onload = init;
 window.onkeydown=function(evt) {
-	if(evt.keyCode == 27) {
-		Qt.quit();
+	var c = evt.keyCode;
+	if(c == 27) {
+		if (W.isPfsMode) {
+			D.body.style.backgroundColor = viewContainer.style.backgroundColor = thumb.style.display = bar.style.display = null;
+			viewWrap.style.overflow = 'scroll';
+			W.isPfsMode = 0;
+			onPlayClick();
+		} else {
+			Qt.quit();
+		}
+	}
+	if(c == 32){
+		onPlayClick();
+	}
+	if(c == 39){
+		onNextClick();
+	}
+	if(c == 37){
+		onPrevClick();
 	}
 }
 function init(){
+	W.wasResize = 1;
 	W.T = 1000;
 	W.data = data = getFolderImages();
 	buildPreviews(data);
@@ -18,9 +50,20 @@ function init(){
 	bZoomBreak.onclick = onZoomBreak;
 	bZoomOut.onclick = onZoomOut;
 	bAdjust.onclick = onAdjustClick;
+	bSlideRun.onclick = onSlideRunClick;
 	setCurrentImage(data[0]);
 	W.currentImgN = 0;
 	setActiveThumb();
+}
+function onSlideRunClick() {
+	W.wasResize = 1;
+	thumb.style.display = bar.style.display = 'none';
+	W.playProc = 0;
+	W.isPfsMode = 1;
+	onPlayClick();
+	D.body.style.backgroundColor = viewContainer.style.backgroundColor = 'black';
+	setCurrentImage(W.currentOnfoObj);
+	viewWrap.style.overflow = null;
 }
 function onAdjustClick() {
 	if (!W.adjustMode) {
@@ -58,6 +101,7 @@ function onPlayClick() {
 	} else {
 		bPlay.src = './img/a/media-playback-start.png';
 		clearInterval(W.playIval);
+		W.playProc = 0;
 	}
 }
 function getInactiveImage() {
@@ -85,22 +129,30 @@ function setCurrentImage(infoObj) {
 	if (infoObj) {
 		W.currentOnfoObj = infoObj;
 		var i = getInactiveImage(),
-			wV = getViewport(),
+			wV,
 			j = getActiveImage();
-		wV.w -= (e('thumb').offsetWidth + 20);
-		wV.h -= (bar.offsetHeight + 20);
-		gallery.style.height = gallery.style.maxHeight = (getViewport().h - bar.offsetHeight - 20) + 'px';
-		viewContainer.style.height = wV.h + 'px';
-		viewContainer.style.width  = wV.w + 'px';
+		
+		wV = getViewport();
+		
+		if (W.wasResize) {
+			wV.w -= (e('thumb').offsetWidth + 20);
+			wV.h -= (bar.offsetHeight + 20);
+			gallery.style.height = gallery.style.maxHeight = (wV.h - bar.offsetHeight - 20) + 'px';
+			viewContainer.style.height = wV.h + 'px';
+			viewContainer.style.width  = wV.w + 'px';
+			W.wasResize = 0;
+		}
 		i.src = infoObj.src;
 		
 		i.style.height = i.style.width = null;
 		j.style.height = j.style.width = null;
 		
+		
 		var pW = i.offsetWidth / 100,
 				pH = i.offsetHeight / 100,
 				pWJ = j.offsetWidth / 100,
 				pHJ = j.offsetHeight / 100;
+		
 		zoomPlace(i, wV);
 		zoomPlace(j, wV);
 		
@@ -139,6 +191,7 @@ function setCurrentImage(infoObj) {
 			zoomPlace(i, wV);
 			zoomPlace(j, wV);
 		}
+		
 		i.style.left = ((wV.w - i.offsetWidth) / 2) + 'px';
 		i.style.top =  ((wV.h - i.offsetHeight) / 2) + 'px';
 		j.style.left = ( (wV.w - j.offsetWidth) / 2) + 'px';
@@ -156,9 +209,10 @@ function setCurrentImage(infoObj) {
 		if (parseInt(j.style.left) < 0) {
 			j.style.left = '0px';
 		}
-		
+
 		j.style.opacity = 0.0;
 		i.style.opacity = 1.0;/**/
+
 		/*W.procAnim = 1;
 		var inter = setInterval(function(){
 			i.style.opacity += 0.15;
@@ -201,6 +255,7 @@ function onClickThumb(evt) {
 		
 }
 function onResizeWindow() {
+	W.wasResize = 1;
 	if(W.currentOnfoObj) {
 		setCurrentImage(W.currentOnfoObj);
 	}

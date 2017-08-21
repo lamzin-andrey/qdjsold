@@ -8,6 +8,7 @@
 	<link type="text/css" rel="stylesheet" href="./css/tools.css">
 	<link type="text/css" rel="stylesheet" href="./css/bar.css">
 	<link type="text/css" rel="stylesheet" href="./css/tbl-thumb.css">
+	<link type="text/css" rel="stylesheet" href="./css/view.css">
 	<link type="text/css" rel="stylesheet" href="./css/mainimage.css">
 	<script src="./js/micron.js"></script>
 	<script src="./js/app.js"></script>
@@ -48,13 +49,14 @@
 			</ul>
 		</td>
 		<!-- /end class thumb -->
-		<td class="view" style="border:blue 1px solid; height:100%;width:100%;vertical-align:top;" id="viewContainer">
-			<div style="display:block;height:100%;overflow:scroll;" class="relative">
+		<td class="view" style="height:100%;width:100%;vertical-align:top;" id="viewContainer">
+			<div style="display:block;height:100%;overflow:scroll;" class="relative" id="viewWrap">
 				<img src="./img/olenGit.png" id="bigView1" class="absolute" >
 				<img src="./img/olenGit.png" id="bigView2" style="opacity:0;" class="absolute" >
 			</div>
 		</td>
-		</tr></table>
+		</tr><!--tr><td id="log"></td><td></td></tr-->
+		</table>
 	</div>
 </body>
 </html>

@@ -16,6 +16,12 @@ function Camel2Snake() {
 		Menu.show();
 	});
 	$('#in').focus();
+	window.onkeydown = onQuit;
+	function onQuit(e){
+		if (e.keyCode == 27) {
+			Qt.quit();
+		}
+	}
 	$('#in')[0].onkeydown = function() {
 		setTimeout(function() {
 			var a = $('#in').val(), i, r = '';
@@ -78,6 +84,7 @@ function Camel2Snake() {
 		}
 		return '[' + r.join(', ') + ']';
 	}
+	
 }
 
 window.onload=Camel2Snake;

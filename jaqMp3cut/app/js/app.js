@@ -11,10 +11,10 @@ function jmp3cutOnConvertClick() {
 		name = Qt.appDir() + '/sh.sh';
 		PHP.file_put_contents(name, cmd);
 		
-		cmd = 'cd ' + jmp3cutGetDir() + ';\navconv -i ' + jmp3cutGetName() + ' -ss ' + e('start').value + ' -t ' + e('duration').value + ' ' +
+		//cmd = 'cd ' + jmp3cutGetDir() + ';\navconv -i ' + jmp3cutGetName() + ' -ss ' + e('start').value + ' -t ' + e('duration').value + ' ' +
 			jmp3cutGetOutfile();
 		
-		PHP.exec(cmd, 'jmp3cutOnFinish', 'jmp3cutOnStd', 'jmp3cutOnErr');
+		PHP.exec(name, 'jmp3cutOnFinish', 'jmp3cutOnStd', 'jmp3cutOnErr');
 		//TODO следить за изменением размера файла, если перестал увеличиваться, значит финиш
 	} else {
 		alert('Вам надо выбрать mp3 файл');

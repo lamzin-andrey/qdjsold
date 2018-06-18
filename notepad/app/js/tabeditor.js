@@ -62,7 +62,8 @@
 			lastTimeLoadFileClick = 0,
 			maxEditorHeight = false,
 			ContentFunctions = {globals:{}},
-			DefaultContentFunctions = _getStdMethods();
+			fileExtensions = '*.cpp *.txt *.php *.js *.sh *.as';
+			//DefaultContentFunctions = _getStdMethods();
 		window.SiEd = {};
 		if (!$(mid)[0]) {
 			return;
@@ -203,7 +204,7 @@
 					function () {
 						setMenuIconState();
 						var data = showTextCursorCoord();
-						showCodeHint(data);
+						//showCodeHint(data);
 					}
 					, 10
 				);
@@ -229,8 +230,13 @@
 			//setIconSaveAsState();
 		}
 		//Сохранение файла
-		function saveNow() {return;//TODO
-			function onFailSaveFile() {
+		function saveNow() {
+			if (fileId == -1) {
+				fileId = Qt.saveFileDialog('Сохранить как', '', fileExtensions);
+			}
+			PHP.file_put_contents(fileId, $(mid).val());
+			return;//TODO
+			/*function onFailSaveFile() {
 				showError(lang['fail_save_file_try_again']);
 			}
 			function onSaveFile(data) {
@@ -278,7 +284,7 @@
 			} else {
 				$("#qsEditorSave").css('cursor', 'default').attr("src", WEB_ROOT + "/img/save_d.png")[0].onclick=null;
 			}
-			return false;
+			return false;*/
 		}
 		//Save as , fail
 		function onFailSaveNew() {
@@ -349,9 +355,9 @@
 		//TODO
 		$('#scriptFileQsButton').click(sendSaveAs);
 		$('#scriptDisplayNameQs').keydown(sendSaveAs);
-		$('#qsEditorSaveAs').click(showSaveAs);
-		$('#qsEditorOpenFile').click(showOpenFileDlg);
-		$('#qsEditorSetPro').click(showProjectSettingDlg);
+		//$('#qsEditorSaveAs').click(showSaveAs);
+		//$('#qsEditorOpenFile').click(showOpenFileDlg);
+		//$('#qsEditorSetPro').click(showProjectSettingDlg);
 		//TODO
 		
 		//Загрузка последнего содержимого

@@ -62,7 +62,8 @@
 			lastTimeLoadFileClick = 0,
 			maxEditorHeight = false,
 			ContentFunctions = {globals:{}},
-			fileExtensions = '*.cpp *.txt *.php *.js *.sh *.as';
+			fileExtensions = '*.cpp *.txt *.php *.js *.sh *.as',
+			lastLocation = '';
 			//DefaultContentFunctions = _getStdMethods();
 		window.SiEd = {};
 		if (!$(mid)[0]) {
@@ -194,12 +195,18 @@
 				ta.value = s;
 				setCaretPosition(ta, pos + 1 + spaces.length);
 				return false;
-			} else if (e.keyCode == 83 && e.ctrlKey == true) {//Ctrl + S
+			} else if (e.keyCode == 83 && e.ctrlKey == true && e.shiftKey != true) {//Ctrl + S
 				saveNow();
+				return false;
+			} else if (e.keyCode == 83 && e.ctrlKey == true && e.shiftKey == true) {//Ctrl + Shift + S
+				showSaveAs();
+				return false;
+			} else if (e.keyCode == 79 && e.ctrlKey == true) {//Ctrl + O
+				showOpenFileDlg();
 				return false;
 			}
 			else {
-				//console.log(e);
+				console.log(e.keyCode);
 				setTimeout(
 					function () {
 						setMenuIconState();
@@ -232,103 +239,44 @@
 		//Сохранение файла
 		function saveNow() {
 			if (fileId == -1) {
-				fileId = Qt.saveFileDialog('Сохранить как', '', fileExtensions);
+				fileId = Qt.saveFileDialog('Сохранить как', lastLocation, fileExtensions);
 			}
-			PHP.file_put_contents(fileId, $(mid).val());
-			return;//TODO
-			/*function onFailSaveFile() {
-				showError(lang['fail_save_file_try_again']);
-			}
-			function onSaveFile(data) {
-				if (data.status == 'ok') {
-					localStorage.setItem('qsLastSavedText', data.text);
-					$("#qsEditorSave").css('cursor', 'default').attr("src", WEB_ROOT + "/img/save_d.png")[0].onclick = null;
-				} else {
-					if (data.requiredFilename != 1) {
-						showError(data.msg);
-					} else {
-						appWindow('saveScriptFormWrapper', lang['information']);
-					}
-				}
-				buildFunctionList();
-			}
-			if (fileId == -1) {
-				try {
-					var F = eval('(' + $(mid).val() + ')');
-					$('#scriptFileNameQs').val(F.name);
-					if (!F.name) {
-						var name = F.toString().match(/^function\s*([^\s(]+)/)[1];
-						$('#scriptFileNameQs').val(name);
-					}
-				} catch(e) {
-					showError(lang['unable_get_function_name_check_code']);
-					return;
-				}
-				appWindow('saveScriptFormWrapper', lang['information']);
-			} else if(localStorage.getItem('qsLastSavedText') != $(mid).val()){
-				//alert( 'store = |' + localStorage.getItem('qsLastSavedText') + '|, mval=|' +  $(mid).val()  + '|');
-				try {
-					var F = eval('(' + $(mid).val() + ')');
-					if (!F.name) {
-						var name = F.toString().match(/^function\s*([^\s(]+)/)[1];
-						if (!name) {
-							showError(lang['unable_get_function_name_check_code']);
-							return;
-						}
-					}
-				} catch(e) {
-					showError(lang['unable_get_function_name_check_code']);
-					return;
-				}
-				req({id:fileId, val:$(mid).val()}, onSaveFile, onFailSaveFile, 'saveFile', WEB_ROOT + '/editor/');
+			if (!fileId) {
+				fileId = -1;
 			} else {
-				$("#qsEditorSave").css('cursor', 'default').attr("src", WEB_ROOT + "/img/save_d.png")[0].onclick=null;
+				PHP.file_put_contents(fileId, $(mid).val());
+				setTitle(fileId);
 			}
-			return false;*/
+			return;//TODO
 		}
-		//Save as , fail
-		function onFailSaveNew() {
-			showError(lang['fail_save_user_script_try_update']);//TODO lang
-		}
-		//Save as, success
-		function onSaveNew(d) {//TODO return;
-			
-		}
+		window.saveNow = saveNow;
+		
 		//Сохранить как, клик на иконке
-		function showSaveAs() {console.log('showOPenFileDialog'); return; //TODO;
-			fileId = -1;
-			fileDisplayName = '';
-			$('#scriptFileNameQs').val('');
-			$('#scriptDisplayNameQs').val('');
-			appWindow('saveScriptFormWrapper', lang['information']);
+		window.showSaveAs = function() {
+			var fileId = Qt.saveFileDialog('Сохранить как', lastLocation, fileExtensions);
+			PHP.file_put_contents(fileId, $(mid).val());
+			setTitle(fileId);
+			return;
 		}
-		//Сохранить как, отправка формы
-		function sendSaveAs(evt) {console.log('showOPenFileDialog'); return //TODO;
-			if (evt.target.id == 'scriptDisplayNameQs' && evt.keyCode != 13) {
-				return true;
-			}
-			if (!guid && !uid) {
-				showError(lang['fail_save_user_script_try_update']);
-				return false;
-			}
-			try {
-				var F = eval('(' + $(mid).val() + ')');
-				$('#scriptFileNameQs').val(F.name);
-			} catch(e) {
-				showError(lang['main_function_require']);
-				return false;
-			}
-			if (!F.name) {
-				var name = F.toString().match(/^function\s*([^\s(]+)/)[1];
-				$('#scriptFileNameQs').val(name);
-			}
-			if (!$('#scriptFileNameQs').val()) {
-				showError(lang['main_function_require']);
-				return false;
-			}
-			req({fileName: $('#scriptFileNameQs').val(), display:$('#scriptDisplayNameQs').val(), content:$(mid).val()}, onSaveNew, onFailSaveNew, 'saveFileAs', WEB_ROOT + '/editor/');
-			return false;
+		//Диалог выбора файла
+		window.showOpenFileDlg = function() {
+			var fileId = Qt.openFileDialog('Открыть', lastLocation, fileExtensions), c;
+			c = PHP.file_get_contents(fileId);
+			$(mid).val(c);
+			setTitle(fileId);
+			setFileId(fileId);
 		}
+		
+		function setTitle(path) {
+			var a = path.split(PATH_SEPARATOR),
+				short = a[a.length - 1];
+			Qt.setWindowTitle(short + ' - ' + APP_NAME);
+		}
+		function setFileId(fid) {
+			fileId = fid;
+		}
+		
+		
 		//
 		function onKeyUp() {
 			//Сохранение в localStorage
@@ -336,32 +284,26 @@
 			//позиция курсора
 			showTextCursorCoord();
 		}
-		function showOpenFileDlg() {console.log('showOPenFileDialog'); return; //TODO 
-			function onFailLoadUserFiles() {
-				showError(lang["unable_load_file_list_try_later"]);
-				appWindowClose();
-			}
-			function loadFileContent() {console.log('file content was loaded'); return; //TODO
-				$(mid).val(PHP.file_get_contents());//TODO
-			}
-		}
+		
 		
 		
 		//Инициализация
 		$(mid).keydown(onKeyDown);
+		$(window).keydown(onKeyDown);
 		$(mid).keyup(onKeyUp);
 		$(mid).click(setMenuIconState);
 		$(mid).click(showTextCursorCoord);
+		
 		//TODO
-		$('#scriptFileQsButton').click(sendSaveAs);
-		$('#scriptDisplayNameQs').keydown(sendSaveAs);
+		//$('#scriptFileQsButton').click(sendSaveAs);
+		//$('#scriptDisplayNameQs').keydown(sendSaveAs);
 		//$('#qsEditorSaveAs').click(showSaveAs);
 		//$('#qsEditorOpenFile').click(showOpenFileDlg);
 		//$('#qsEditorSetPro').click(showProjectSettingDlg);
 		//TODO
 		
 		//Загрузка последнего содержимого
-		if (localStorage.getItem('qsLastText')) {
+		if (localStorage && localStorage.getItem('qsLastText')) {
 			$(mid).val( localStorage.getItem('qsLastText') );
 			setMenuIconState();
 			showTextCursorCoord();
@@ -384,8 +326,12 @@
 		}
 		$(mid).bind('mousewheel', showTextCursorCoord);
 		
-		showTextCursorCoord();
-		
+		showTextCursorCoord();;
+		setTimeout(
+			function() {
+				$(mid).focus();
+			}, 100
+		);
 	}
 	
 function showError(s) {

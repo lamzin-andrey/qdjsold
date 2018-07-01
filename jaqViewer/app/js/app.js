@@ -54,6 +54,7 @@ function init(){
 	setCurrentImage(data[0]);
 	W.currentImgN = 0;
 	setActiveThumb();
+	//Qt.showFullScreen();
 }
 function onSlideRunClick() {
 	W.wasResize = 1;

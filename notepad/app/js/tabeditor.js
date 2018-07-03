@@ -56,6 +56,9 @@
 		return pos;
 	}
 	function initSampleTextEditor()  {
+		if (window.preInitJaqEditorApp instanceof Function) {
+			preInitJaqEditorApp();
+		}
 		var mid = '#ta',
 			fileId = -1,
 			fileDisplayName = '',
@@ -70,21 +73,11 @@
 			return;
 		}
 		function showTextCursorCoord() {
-			var p = getCaretPosition($(mid)[0]),
-				s = $(mid).val(), i, res = {x:1, y:1};
-				
-			for(i = 0; i < p; i++){
-				if (s.charAt(i) == '\n') {
-					res.y++;
-					res.x = 1;
-					continue;
-				}
-				res.x++;
-			}
-			$('#qsline').text(res.y);
-			$('#qscol').text(res.x);
-			lines(s, res.y);
-			return {p:p, s:s};
+			var cursorData = getEditorCursorData();
+			$('#qsline').text(cursorData.coords.y);
+			$('#qscol').text(cursorData.coords.x + ', scrollY = ' + getEditorScrollY());
+			lines(cursorData.text, cursorData.coords.y);
+			return {p:cursorData.pos, s:cursorData.text};
 		}
 		function lines(s, n){
 			var total = s.split('\n').length, i = 0,
@@ -204,6 +197,9 @@
 			} else if (e.keyCode == 79 && e.ctrlKey == true) {//Ctrl + O
 				showOpenFileDlg();
 				return false;
+			} else if (e.keyCode == 70 && e.ctrlKey == true) {//Ctrl + F
+				showSearchDlg();
+				return false;
 			}
 			else {
 				console.log(e.keyCode);
@@ -215,6 +211,7 @@
 					}
 					, 10
 				);
+				return true;
 			}
 		}
 		/**
@@ -293,14 +290,8 @@
 		$(mid).keyup(onKeyUp);
 		$(mid).click(setMenuIconState);
 		$(mid).click(showTextCursorCoord);
-		
-		//TODO
-		//$('#scriptFileQsButton').click(sendSaveAs);
-		//$('#scriptDisplayNameQs').keydown(sendSaveAs);
-		//$('#qsEditorSaveAs').click(showSaveAs);
-		//$('#qsEditorOpenFile').click(showOpenFileDlg);
-		//$('#qsEditorSetPro').click(showProjectSettingDlg);
-		//TODO
+		$('#hStatusbar').click(onEditorFocused);
+		$(mid).bind('focus', onEditorFocused);
 		
 		//Загрузка последнего содержимого
 		if (localStorage && localStorage.getItem('qsLastText')) {
@@ -326,14 +317,181 @@
 		}
 		$(mid).bind('mousewheel', showTextCursorCoord);
 		
-		showTextCursorCoord();;
+		showTextCursorCoord();
 		setTimeout(
 			function() {
 				$(mid).focus();
 			}, 100
 		);
+		if (window.initJaqEditorApp instanceof Function) {
+			initJaqEditorApp();
+		}
 	}
 	
+/**
+ * @return {JQuery} объект блока с многострочным полем ввода. На случай если вместо textarea внутри будет что-то сложное
+*/
+function getEditorBlock() {
+	return $('#ta');
+}
+/**
+ * @return {Number} Высоту линии многострочного поля ввода. На случай если вместо textarea внутри будет что-то сложное
+*/
+function getEditorLineHeight() {
+	if (window.getJaqEditorLineHeight instanceof Function) {
+		return getJaqEditorLineHeight();
+	}
+	//Запомни, все эти коэффициенты - муть, дело было в автопереносе строк
+	//1,315340909 - для шрифта 16 и line-height 16 - 18
+	//0,997840173 -           16 и line-height 22
+	//коэффициент получен так: n = реальная высота поля ввода поделена на кол-во линий входжящих в него без остатка
+	//k = n / line-height при том что line-height был равен fint-size
+	return parseFloat( $('#ta').css('line-height').replace('px', '') );// * 1.315340909;
+}
+/**
+ * @return {Number} Прокрутку многострочного поля ввода по вертикали. На случай если вместо textarea внутри будет что-то сложное
+*/
+function getEditorScrollY() {
+	if (window.getJaqEditorScrollY instanceof Function) {
+		return getJaqEditorScrollY();
+	}
+	return parseInt( $('#ta')[0].scrollTop, 10 );
+}
+/**
+ * @description Установить прокрутку многострочного поля ввода по вертикали. На случай если вместо textarea внутри будет что-то сложное
+*/
+function setEditorScrollY(n) {
+	if (window.setJaqEditorScrollY instanceof Function) {
+		return setJaqEditorScrollY();
+	}
+	//$('#ta')[0].scrollTo(0, n);
+	$('#ta')[0].scrollTop = n;
+}
+/**
+ * @return {Number} Прокрутку многострочного поля ввода по горизонтали. На случай если вместо textarea внутри будет что-то сложное
+*/
+function getEditorScrollX() {
+	if (window.getJaqEditorScrollX instanceof Function) {
+		return getJaqEditorScrollX();
+	}
+	return parseInt( $('#ta')[0].scrollLeft, 10 );
+}
+/**
+ * @return {Number} Позицию курсора в многострочном текстовом поле  На случай если вместо textarea внутри будет что-то сложное
+*/
+function getEditorCaretPosition() {
+	if (window.getJaqEditorCaretPosition instanceof Function) {
+		return getJaqEditorCaretPosition();
+	}
+	return getCaretPosition($('#ta')[0]);
+}
+/**
+ * @return {Number} Позицию курсора в многострочном текстовом поле  На случай если вместо textarea внутри будет что-то сложное
+*/
+function setEditorCaretPosition(n) {
+	if (window.setJaqEditorCaretPosition instanceof Function) {
+		return setJaqEditorCaretPosition();
+	}
+	return setCaretPosition($('#ta')[0], n);
+}
+/**
+ * @return {String} Содержимое поля ввода  На случай если вместо textarea внутри будет что-то сложное
+*/
+function getEditorContent() {
+	if (window.getJaqEditorContent instanceof Function) {
+		return getJaqEditorContent();
+	}
+	return $('#ta').val();
+}
+/**
+ * @description Для того чтобы делать модальные диалоги "неактивными" когда они не в фокусе
+*/
+function onEditorFocused() {
+	if (!window.SiEd) {
+		return;
+	}
+	var dlgs = window.SiEd.modalDialogs, i;
+	if (dlgs) {
+		for (i = 0; i < dlgs.length; i++) {
+			if (dlgs[i].setInactive instanceof Function) {
+				dlgs[i].setInactive();
+			}
+		}
+	}
+}
+/**
+ * @description Данные о позиции курсора в тексте, и его "координатах" (столбец, линия)
+ * @return {pos:Number, text:String, coords:{x,y}}
+*/
+function getEditorCursorData() {
+		var p = getEditorCaretPosition(),
+			s = $('#ta').val(), i, res = {x:1, y:1};
+			
+		for(i = 0; i < p; i++){
+			if (s.charAt(i) == '\n') {
+				res.y++;
+				res.x = 1;
+				continue;
+			}
+			res.x++;
+		}
+		return {
+			coords:res,
+			pos:p,
+			text:s
+		};
+	}
+/**
+ * @description Установка курсора на слово найденное в открытом файле
+*/
+function setCaretOnFoundWord(sub) {
+	var start = getEditorCaretPosition(),
+		i, cursorData, y, n,
+		s = getEditorContent();
+	i = s.indexOf(sub, start + 1);
+	if (start == 0 && i == -1) {
+		alert(L('Not found'));
+		showSearchDlg();
+	}
+	if (start > 0 && i == -1) {
+		if ( confirm(L('Continue from top') + '?') ) {
+			setEditorCaretPosition(0);
+			setCaretOnFoundWord(sub);
+			return;
+		}
+	}
+	if (i != -1) {
+		setEditorCaretPosition(i);
+		
+		//setTimeout(function(){getEditorCaretPosition();}, 1000);
+		
+		//попадает ли слово в область видимости?
+		cursorData = getEditorCursorData();
+		//где у нас курсор от верхнего бордера?
+		y = getEditorLineHeight() * (cursorData.coords.y + 1);
+		if (y > getEditorBlock().height()) {
+			n = y - getEditorBlock().height();
+			setEditorScrollY(n);
+		} else {
+			setEditorScrollY(0);
+		}
+		$('#qsline').text(cursorData.coords.y);
+		$('#qscol').text(cursorData.coords.x  + ', scrollY = ' + getEditorScrollY());
+		
+		
+		setTimeout(showSearchDlg, 200);
+		
+	}
+}
+
+function showSearchDlg() {
+	if (window.onCtrlF instanceof Function) {
+		window.onCtrlF();
+	} else {
+		showSearchWordApplet();
+	}
+}
+
 function showError(s) {
 	alert(s);
 }

@@ -1,3 +1,8 @@
 html, body {height:100%;}
 body {padding:0px; margin:0px;}
-textarea {height:100%; width:99%;resize:none; border:none;}
+textarea {height:100%; width:99%;resize:none; border:none;line-height:22px;font-size:16px;}
+#hStatusbar {
+	height:19px;
+	font-size:12px;
+	border-top:1px solid gray;
+}

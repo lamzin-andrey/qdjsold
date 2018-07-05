@@ -37,6 +37,9 @@ searchWordDialog.prototype.setActive = function() {
 searchWordDialog.prototype.createView = function() {
 	var bd = $(document.getElementsByTagName('body')[0]);
 	bd.append($(this.getWndTpl()));
+	
+	setCheckboxView();
+	
 	this.iFindWord = $('#iFindWord');
 	this.bFindWord = $('#bFindWord');
 	this.bCancel   = $('#bCancel');
@@ -122,8 +125,12 @@ searchWordDialog.prototype.getWndTpl = function() {
 		<div>\
 			<input type="text" id="iFindWord">\
 			<div class="bWrapRight">\
-				<input type="button" id="bFindWord" value="Find">\
-				<input type="button" id="bCancel" value="Cancel">\
+				<div class="iblock matchcaseblock" >\
+					<input type="checkbox" id="bMatchCase">\
+					<div for="bMatchCase" class="iblock chbView">&nbsp;</div><label for="bMatchCase">' + L('Match case') + '</label>\
+				</div>\
+				<input type="button" id="bFindWord" value="' + L('Find') + '">\
+				<input type="button" id="bCancel" value="' + L('Cancel') + '">\
 			</div>\
 		</div>\
 	\

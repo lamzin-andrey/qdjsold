@@ -18,10 +18,30 @@
 	margin-bottom:10px;
 	background-color: #FFF;
 }
-/*#inputdlgarea input[type=button] {
+/* #inputdlgarea input[type=button] {
 	
 }*/
 .bWrapRight {
 	text-align:right;
 	margin-bottom:7px;
+}
+.iblock {
+	display:inline-block;
+}
+.matchcaseblock {
+	line-height:22px;
+}
+#bMatchCase {
+	vertical-align:bottom;
+	color:green;
+	background-color:white;
+	display:none;
+}
+.chbView {
+	background: url(../i/unchecked.png) 0 2px no-repeat;
+	min-width:16px;
+	margin-right:8px;
+}
+label[for=bMatchCase] {
+	font-size:12px;
 }

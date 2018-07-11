@@ -6,3 +6,7 @@ textarea {height:100%; width:99%;resize:none; border:none;line-height:22px;font-
 	font-size:12px;
 	border-top:1px solid gray;
 }
+body.night textarea  {
+	background-color:#000;
+	color:#97dc86;
+}

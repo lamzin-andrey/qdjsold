@@ -2,5 +2,8 @@
 	"File":"Файл", 
 	"Open Ctrl+O": "Открыть Ctrl+O",
 	"Save Ctrl+S": "Сохранить Ctrl+S",
+	"View": "Вид",
+	"Day": "День",
+	"Night": "Ночь",
 	"Save as... Ctrl+Shift+S": "Сохранить как... Ctrl+Shift+S"
 }

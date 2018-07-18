@@ -44,6 +44,7 @@ searchWordDialog.prototype.createView = function() {
 	this.bFindWord = $('#bFindWord');
 	this.bCancel   = $('#bCancel');
 	this.hFindDlg  = $('#inputdlgarea');
+	this.bMatchCase  = $('#bMatchCase');
 	
 	this.iFindWord.bind('keydown', this.onKeyDown);	//закрывать по Escape
 	this.bFindWord.bind('keydown', this.onKeyDown);
@@ -59,7 +60,7 @@ searchWordDialog.prototype.createView = function() {
 searchWordDialog.prototype.onFindClick = function(e){
 	e.preventDefault();
 	//это базовая функция определена в tabeditor.js
-	setCaretOnFoundWord(window.oSearchWordDialog.iFindWord.val());
+	setCaretOnFoundWord(window.oSearchWordDialog.iFindWord.val(), window.oSearchWordDialog.bMatchCase.prop('checked'));
 	return false;
 }
 /**

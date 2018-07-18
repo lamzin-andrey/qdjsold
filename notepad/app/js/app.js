@@ -14,3 +14,9 @@ function setWndLayout() {
 window.onresize = function() {
 	setWndLayout();
 }
+function setBlackMode() {
+	$(document.body).addClass('night');
+}
+function setWhiteMode() {
+	$(document.body).removeClass('night');
+}

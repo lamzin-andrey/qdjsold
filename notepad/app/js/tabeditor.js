@@ -194,7 +194,7 @@
 			} else if (e.keyCode == 83 && e.ctrlKey == true && e.shiftKey == true) {//Ctrl + Shift + S
 				showSaveAs();
 				return false;
-			} else if (e.keyCode == 79 && e.ctrlKey == true) {//Ctrl + O
+			} else if (isCtrlO(e)) {//Ctrl + O
 				showOpenFileDlg();
 				return false;
 			} else if (e.keyCode == 70 && e.ctrlKey == true) {//Ctrl + F
@@ -257,7 +257,10 @@
 		}
 		//Диалог выбора файла
 		window.showOpenFileDlg = function() {
-			var fileId = Qt.openFileDialog('Открыть', lastLocation, fileExtensions), c;
+			var fileId = Qt.openFileDialog(L('Open'), lastLocation, fileExtensions), c;
+			if (!fileId) {
+				return;
+			}
 			c = PHP.file_get_contents(fileId);
 			$(mid).val(c);
 			setTitle(fileId);
@@ -444,11 +447,14 @@ function getEditorCursorData() {
 /**
  * @description Установка курсора на слово найденное в открытом файле
 */
-function setCaretOnFoundWord(sub) {
+function setCaretOnFoundWord(sub, matchCase) {
 	var start = getEditorCaretPosition(),
 		i, cursorData, y, n,
 		s = getEditorContent();
 	i = s.indexOf(sub, start + 1);
+	if (!matchCase) {
+		i = s.toLowerCase().indexOf(sub.toLowerCase(), start + 1);
+	}
 	if (start == 0 && i == -1) {
 		alert(L('Not found'));
 		showSearchDlg();
@@ -492,18 +498,32 @@ function showSearchDlg() {
 	}
 }
 /**
+ * @description Проверка была ли нажата клавиша Ctrl+O
+ * @param {KeyPressEvent} e
+*/
+function isCtrlO(e) {
+	return isCtrlHotKey(e, {79:1,'o':1,'O':1,'щ':1, 'Щ':1});
+}
+/**
  * @description Проверка была ли нажата клавиша Ctrl+S
  * @param {KeyPressEvent} e
 */
 function isCtrlS(e) {
+	return isCtrlHotKey(e, {83:1,'s':1,'S':1,'ы':1, 'Ы':1});
+}
+/**
+ * @description Проверка был ли нажат хоткей с Ctrl
+ * @param {KeyPressEvent} e
+*/
+function isCtrlHotKey(e, allow) {
 	if (e.shiftKey != true && e.ctrlKey == true) {
 		dbg(Qt.getLastKeyCode() + ':"' + Qt.getLastKeyChar() + '"');
-		if(e.keyCode == 83) {
+		if(e.keyCode in allow) {
 			return true;
 		}
 		//hack for qt 5.2.1 linux amd64
 		if (e.keyCode == 0) {
-			var ch = Qt.getLastKeyChar(), allow = {83:1,'s':1,'S':1,'ы':1, 'Ы':1},
+			var ch = Qt.getLastKeyChar(),
 				n = Qt.getLastKeyCode();
 			if (ch in allow || n in allow) {//but in qt 5.2.1 linux amd64 и тут ждет сюрприз...
 				return true;

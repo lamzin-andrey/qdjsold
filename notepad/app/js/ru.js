@@ -2,6 +2,9 @@
 window.jaqedLang = {
 	'Not found'	: 'Ничего не найдено',
 	'Continue from top'	: 'Ничего не найдено. Продолжить с начала документа',
+	'Continue from end'	: 'Ничего не найдено. Продолжить с конца документа',
+	'Find next'	: 'Следующее',
+	'Find previous'	: 'Предыдущее',
 	'Find'	: 'Найти',
 	'Cancel'	: 'Отмена',
 	'Open'	: 'Открыть',

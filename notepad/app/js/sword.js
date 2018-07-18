@@ -42,6 +42,7 @@ searchWordDialog.prototype.createView = function() {
 	
 	this.iFindWord = $('#iFindWord');
 	this.bFindWord = $('#bFindWord');
+	this.bFindWordPrev = $('#bFindWordPrev');
 	this.bCancel   = $('#bCancel');
 	this.hFindDlg  = $('#inputdlgarea');
 	this.bMatchCase  = $('#bMatchCase');
@@ -52,6 +53,7 @@ searchWordDialog.prototype.createView = function() {
 	var o = this;
 	this.hFindDlg.click(function(e){o.iFindWord.focus(); o.setActive();});
 	this.bFindWord.click(this.onFindClick);
+	this.bFindWordPrev.click(this.onClickFindPrev);
 	this.bCancel.click(this.onCancelClick);
 }
 /**
@@ -61,6 +63,15 @@ searchWordDialog.prototype.onFindClick = function(e){
 	e.preventDefault();
 	//это базовая функция определена в tabeditor.js
 	setCaretOnFoundWord(window.oSearchWordDialog.iFindWord.val(), window.oSearchWordDialog.bMatchCase.prop('checked'));
+	return false;
+}
+/**
+ * @description Обработка нажатия клавиши Find
+*/
+searchWordDialog.prototype.onClickFindPrev = function(e){
+	e.preventDefault();
+	//это базовая функция определена в tabeditor.js
+	setCaretOnFoundWord(window.oSearchWordDialog.iFindWord.val(), window.oSearchWordDialog.bMatchCase.prop('checked'), 1);
 	return false;
 }
 /**
@@ -130,7 +141,8 @@ searchWordDialog.prototype.getWndTpl = function() {
 					<input type="checkbox" id="bMatchCase">\
 					<div for="bMatchCase" class="iblock chbView">&nbsp;</div><label for="bMatchCase">' + L('Match case') + '</label>\
 				</div>\
-				<input type="button" id="bFindWord" value="' + L('Find') + '">\
+				<input type="button" id="bFindWordPrev" value="' + L('Find previous') + '">\
+				<input type="button" id="bFindWord" value="' + L('Find next') + '">\
 				<input type="button" id="bCancel" value="' + L('Cancel') + '">\
 			</div>\
 		</div>\

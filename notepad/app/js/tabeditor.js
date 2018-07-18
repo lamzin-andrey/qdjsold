@@ -447,7 +447,7 @@ function getEditorCursorData() {
 /**
  * @description Установка курсора на слово найденное в открытом файле
 */
-function setCaretOnFoundWord(sub, matchCase) {
+function setCaretOnFoundWord(sub, matchCase, bReverse) {
 	var start = getEditorCaretPosition(),
 		i, cursorData, y, n,
 		s = getEditorContent();
@@ -455,15 +455,29 @@ function setCaretOnFoundWord(sub, matchCase) {
 	if (!matchCase) {
 		i = s.toLowerCase().indexOf(sub.toLowerCase(), start + 1);
 	}
+	if (bReverse) {
+		i = s.lastIndexOf(sub, start - 1);
+		if (!matchCase) {
+			i = s.toLowerCase().lastIndexOf(sub.toLowerCase(), start - 1);
+		}
+	}
 	if (start == 0 && i == -1) {
 		alert(L('Not found'));
 		showSearchDlg();
 	}
 	if (start > 0 && i == -1) {
-		if ( confirm(L('Continue from top') + '?') ) {
-			setEditorCaretPosition(0);
-			setCaretOnFoundWord(sub);
-			return;
+		if (!bReverse) {
+			if ( confirm(L('Continue from top') + '?') ) {
+				setEditorCaretPosition(0);
+				setCaretOnFoundWord(sub, matchCase, bReverse);
+				return;
+			}
+		} else {
+			if ( confirm(L('Continue from end') + '?') ) {
+				setEditorCaretPosition(s.length - 1);
+				setCaretOnFoundWord(sub, matchCase, bReverse);
+				return;
+			}
 		}
 	}
 	if (i != -1) {

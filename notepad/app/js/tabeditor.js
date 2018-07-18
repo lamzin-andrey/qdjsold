@@ -188,7 +188,7 @@
 				ta.value = s;
 				setCaretPosition(ta, pos + 1 + spaces.length);
 				return false;
-			} else if (e.keyCode == 83 && e.ctrlKey == true && e.shiftKey != true) {//Ctrl + S
+			} else if (isCtrlS(e)) {//Ctrl + S
 				saveNow();
 				return false;
 			} else if (e.keyCode == 83 && e.ctrlKey == true && e.shiftKey == true) {//Ctrl + Shift + S
@@ -490,6 +490,32 @@ function showSearchDlg() {
 	} else {
 		showSearchWordApplet();
 	}
+}
+/**
+ * @description Проверка была ли нажата клавиша Ctrl+S
+ * @param {KeyPressEvent} e
+*/
+function isCtrlS(e) {
+	if (e.shiftKey != true && e.ctrlKey == true) {
+		dbg(Qt.getLastKeyCode() + ':"' + Qt.getLastKeyChar() + '"');
+		if(e.keyCode == 83) {
+			return true;
+		}
+		//hack for qt 5.2.1 linux amd64
+		if (e.keyCode == 0) {
+			var ch = Qt.getLastKeyChar(), allow = {83:1,'s':1,'S':1,'ы':1, 'Ы':1},
+				n = Qt.getLastKeyCode();
+			if (ch in allow || n in allow) {//but in qt 5.2.1 linux amd64 и тут ждет сюрприз...
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+function dbg(s) {
+	$('#dbg').text(s);
 }
 
 function showError(s) {

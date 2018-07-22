@@ -7,6 +7,8 @@ window.jaqedLang = {
 	'Find previous'	: 'Предыдущее',
 	'Find'	: 'Найти',
 	'Cancel'	: 'Отмена',
+	'Replace'	: 'Заменить',
+	'Replace all'	: 'Заменить всё',
 	'Open'	: 'Открыть',
 	'Match case'	: 'С учетом регистра'
 };

@@ -197,12 +197,14 @@
 			} else if (isCtrlO(e)) {//Ctrl + O
 				showOpenFileDlg();
 				return false;
-			} else if (e.keyCode == 70 && e.ctrlKey == true) {//Ctrl + F
+			} else if (isCtrlF(e)) {//Ctrl + F (70)
 				showSearchDlg();
+				return false;
+			} else if (isCtrlH(e)) {//Ctrl + H
+				showReplaceDlg();
 				return false;
 			}
 			else {
-				console.log(e.keyCode);
 				setTimeout(
 					function () {
 						setMenuIconState();
@@ -503,35 +505,65 @@ function setCaretOnFoundWord(sub, matchCase, bReverse) {
 		
 	}
 }
-
+/**
+ * @description Вызывает либо определенную разработчиком функцию onCtrlH либо стандартную showReplaceWordApplet
+*/
+function showReplaceDlg() {
+	if (window.onCtrlH instanceof Function) {
+		window.onCtrlH();
+	} else {
+		showReplaceWordApplet();//it define in rword.js
+	}
+}
+/**
+ * @description Вызывает либо определенную разработчиком функцию onCtrlF либо стандартную showSearchWordApplet
+*/
 function showSearchDlg() {
 	if (window.onCtrlF instanceof Function) {
 		window.onCtrlF();
 	} else {
-		showSearchWordApplet();
+		showSearchWordApplet();//it define in sword.js
 	}
+}
+/**
+ * @description Проверка была ли нажата клавиша Ctrl+H
+ * @param {KeyPressEvent} e
+*/
+function isCtrlH(e) {
+	return isCtrlHotKey(e, [72, 'h', 'р']);
+}
+/**
+ * @description Проверка была ли нажата клавиша Ctrl+F
+ * @param {KeyPressEvent} e
+*/
+function isCtrlF(e) {
+	//return isCtrlHotKey(e, {70:1,'f':1,'F':1,'а':1, 'А':1});
+	return isCtrlHotKey(e, [70, 'f', 'А']);
 }
 /**
  * @description Проверка была ли нажата клавиша Ctrl+O
  * @param {KeyPressEvent} e
 */
 function isCtrlO(e) {
-	return isCtrlHotKey(e, {79:1,'o':1,'O':1,'щ':1, 'Щ':1});
+	return isCtrlHotKey(e, [79, 'O', 'Щ']);
 }
 /**
  * @description Проверка была ли нажата клавиша Ctrl+S
  * @param {KeyPressEvent} e
 */
 function isCtrlS(e) {
-	return isCtrlHotKey(e, {83:1,'s':1,'S':1,'ы':1, 'Ы':1});
+	//return isCtrlHotKey(e, {83:1,'s':1,'S':1,'ы':1, 'Ы':1});
+	return isCtrlHotKey(e, [83, 'S', 'Ы']);
 }
 /**
  * @description Проверка был ли нажат хоткей с Ctrl
  * @param {KeyPressEvent} e
+ * @param {Array} codes содержит коды клавишь и символы клавиши в едином регистре
 */
-function isCtrlHotKey(e, allow) {
+function isCtrlHotKey(e, codes) {
 	if (e.shiftKey != true && e.ctrlKey == true) {
-		dbg(Qt.getLastKeyCode() + ':"' + Qt.getLastKeyChar() + '"');
+//		dbg(Qt.getLastKeyCode() + ':"' + Qt.getLastKeyChar() + '"');
+		var allow = _createAllowKeymap(codes);
 		if(e.keyCode in allow) {
 			return true;
 		}
@@ -540,13 +572,30 @@ function isCtrlHotKey(e, allow) {
 			var ch = Qt.getLastKeyChar(),
 				n = Qt.getLastKeyCode();
 			if (ch in allow || n in allow) {//but in qt 5.2.1 linux amd64 и тут ждет сюрприз...
+				e.preventDefault();
 				return true;
 			}
 		}
 	}
 	return false;
 }
-
+/**
+ * @description Создает из массива объект, 
+ * @param {Array} codes Например из [70, 'f', 'а'] {70:1, 'f':1, 'а':1, 'F':1, 'А':1}
+*/
+function _createAllowKeymap(codes) {
+	var i, r = {}, j;
+	for (i = 0; i < codes.length; i++) {
+		j = codes[i];
+		if (!isNaN(parseInt(j, 10))) {
+			r[j] = 1;
+		} else {
+			r[j.toLowerCase()] = 1;
+			r[j.toUpperCase()] = 1;
+		}
+	}
+	return r;
+}
 
 function dbg(s) {
 	$('#dbg').text(s);

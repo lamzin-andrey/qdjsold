@@ -447,9 +447,59 @@ function getEditorCursorData() {
 		};
 	}
 /**
- * @description Установка курсора на слово найденное в открытом файле
+ * @description Замена слова sub ближайшего к курсору словом replacement и установка курсора в конец слова
+ * @return Number position
 */
-function setCaretOnFoundWord(sub, matchCase, bReverse) {
+function replaceWordAndSetCaretOnFoundWord(sub, replacement, pos, matchCase) {
+	var start = getEditorCaretPosition(),
+		i, head, tail,
+		s = getEditorContent(),
+		q, success;
+	//проверка, действительно ли слово под курсором искомое
+	q = s.substring(pos, pos + sub.length);
+	success = (q.toLowerCase() == sub.toLowerCase());
+	if (matchCase) {
+		success = (q == sub);
+	}
+	if (success) {
+		i = pos;
+	} else {
+		i = s.indexOf(sub, start + 1);
+		if (!matchCase) {
+			i = s.toLowerCase().indexOf(sub.toLowerCase(), start + 1);
+		}
+	}
+	if (start == 0 && i == -1) {
+		alert(L('Not found'));
+		showReplaceDlg();
+	}
+	if (start > 0 && i == -1) {
+		if ( confirm(L('Continue from top') + '?') ) {
+			setEditorCaretPosition(0);
+			replaceWordAndSetCaretOnFoundWord(sub, replacement, 0, matchCase);
+			return;
+		}
+	}
+	if (i != -1) {
+		head = s.substring(0, i);
+		tail = s.substring(i + sub.length);
+		i += replacement.length;
+		s = head + replacement +  tail;
+		setEditorContent(s);
+		setEdfitorCaretPositionAndScrollViewport(i);
+		setTimeout(showReplaceDlg, 200);
+	}
+}
+/**
+ * @description Установка курсора на слово найденное в открытом файле
+ * @param {String} sub
+ * @param {Boolean} matchCase
+ * @param {Boolean} bReverse
+ * @param {Funcion} callback default showSearchDlg
+ * @return Number position
+*/
+function setCaretOnFoundWord(sub, matchCase, bReverse, callback) {
+	callback = callback ? callback : showSearchDlg;
 	var start = getEditorCaretPosition(),
 		i, cursorData, y, n,
 		s = getEditorContent();
@@ -465,7 +515,7 @@ function setCaretOnFoundWord(sub, matchCase, bReverse) {
 	}
 	if (start == 0 && i == -1) {
 		alert(L('Not found'));
-		showSearchDlg();
+		callback();
 	}
 	if (start > 0 && i == -1) {
 		if (!bReverse) {
@@ -483,27 +533,29 @@ function setCaretOnFoundWord(sub, matchCase, bReverse) {
 		}
 	}
 	if (i != -1) {
-		setEditorCaretPosition(i);
-		
-		//setTimeout(function(){getEditorCaretPosition();}, 1000);
-		
-		//попадает ли слово в область видимости?
-		cursorData = getEditorCursorData();
-		//где у нас курсор от верхнего бордера?
-		y = getEditorLineHeight() * (cursorData.coords.y + 1);
-		if (y > getEditorBlock().height()) {
-			n = y - getEditorBlock().height();
-			setEditorScrollY(n);
-		} else {
-			setEditorScrollY(0);
-		}
-		$('#qsline').text(cursorData.coords.y);
-		$('#qscol').text(cursorData.coords.x  + ', scrollY = ' + getEditorScrollY());
-		
-		
-		setTimeout(showSearchDlg, 200);
-		
+		setEdfitorCaretPositionAndScrollViewport(i);
+		setTimeout(callback, 200);
 	}
+	return i;
+}
+/**
+ * @description Установить курсор в ппозицию и прокрутить полосу прокрутки так чтобы курсор был виден
+ * @param Number i
+*/
+function setEdfitorCaretPositionAndScrollViewport(i) {
+	setEditorCaretPosition(i);
+	//попадает ли слово в область видимости?
+	var cursorData = getEditorCursorData(), y, n;
+	//где у нас курсор от верхнего бордера?
+	y = getEditorLineHeight() * (cursorData.coords.y + 1);
+	if (y > getEditorBlock().height()) {
+		n = y - getEditorBlock().height();
+		setEditorScrollY(n);
+	} else {
+		setEditorScrollY(0);
+	}
+	$('#qsline').text(cursorData.coords.y);
+	$('#qscol').text(cursorData.coords.x  + ', scrollY = ' + getEditorScrollY());
 }
 /**
  * @description Вызывает либо определенную разработчиком функцию onCtrlH либо стандартную showReplaceWordApplet
@@ -596,7 +648,13 @@ function _createAllowKeymap(codes) {
 	}
 	return r;
 }
-
+/**
+ * @description Установить текст в редактор кода
+ * @param {String} s 
+*/
+function setEditorContent(s) {
+	$('#ta').val(s);
+}
 function dbg(s) {
 	$('#dbg').text(s);
 }

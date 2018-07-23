@@ -45,8 +45,8 @@ replaceWordDialog.prototype.createView = function() {
 	this.iReplaceWord 	= $('#iReplaceWord');
 	this.bFindWord 		= $('#bFindRWord');
 	this.bReplaceWord 		= $('#bReplaceWord');
-	this.bReplaceAllWord 	= $('#bReplaceAllWord');
-	this.bCancel   			= $('#bCancel');
+	this.bReplaceAllWord	= $('#bReplaceAllWord');
+	this.bCancel   			= $('#bRCancel');
 	this.hReplaceDlg  			= $('#rinputdlgarea');
 	this.bMatchCase  		= $('#bRMatchCase');
 	
@@ -56,18 +56,51 @@ replaceWordDialog.prototype.createView = function() {
 	var o = this;
 	this.hReplaceDlg.click(function(e){o.iFindWord.focus(); o.setActive();});
 	this.bFindWord.click(this.onFindClick);
+	this.bReplaceWord.click(this.onReplaceClick);
+	this.bReplaceAllWord.click(this.onReplaceAllClick);
 	this.bCancel.click(this.onCancelClick);
 }
 /**
- * @description Обработка нажатия клавиши Find
+ * @description Обработка нажатия кнопки Find
 */
 replaceWordDialog.prototype.onFindClick = function(e){
 	e.preventDefault();
 	//это базовая функция определена в tabeditor.js
-	setCaretOnFoundWord(window.oReplaceWordDialog.iFindWord.val(), window.oReplaceWordDialog.bMatchCase.prop('checked'));
+	/** @property {Number} _pos */
+	oReplaceWordDialog._pos = setCaretOnFoundWord(oReplaceWordDialog.iFindWord.val(),
+		oReplaceWordDialog.bMatchCase.prop('checked'),
+		false, showReplaceDlg
+	);
 	return false;
 }
-
+/**
+ * @description Обработка нажатия кнопки Replace
+*/
+replaceWordDialog.prototype.onReplaceClick = function(e){
+	e.preventDefault();
+	//это базовая функция определена в tabeditor.js
+	replaceWordAndSetCaretOnFoundWord(
+		oReplaceWordDialog.iFindWord.val(),
+		oReplaceWordDialog.iReplaceWord.val(),
+		oReplaceWordDialog._pos,
+		oReplaceWordDialog.bMatchCase.prop('checked')
+	);
+	return false;
+}
+/**
+ * @description Обработка нажатия кнопки Replace All
+*/
+replaceWordDialog.prototype.onReplaceAllClick = function() {
+	e.preventDefault();
+	//это базовая функция определена в tabeditor.js
+	/*replaceWordAndSetCaretOnFoundWord(
+		oReplaceWordDialog.iFindWord.val(),
+		oReplaceWordDialog.iReplaceWord.val(),
+		oReplaceWordDialog._pos,
+		oReplaceWordDialog.bMatchCase.prop('checked')
+	);*/
+	return false;
+}
 /**
  * @description Обработка нажатия клавиши отмена
 */
@@ -163,7 +196,7 @@ replaceWordDialog.prototype.getWndTpl = function() {
 				<input type="button" id="bFindRWord" value="' + L('Find') + '">\
 				<input type="button" id="bReplaceWord" value="' + L('Replace') + '">\
 				<input type="button" id="bReplaceAllWord" value="' + L('Replace all') + '">\
-				<input type="button" id="bCancel" value="' + L('Cancel') + '">\
+				<input type="button" id="bRCancel" value="' + L('Cancel') + '">\
 			</div>\
 		</div>\
 	\

@@ -450,6 +450,13 @@ function getEditorCursorData() {
  * @description Замена слова sub ближайшего к курсору словом replacement и установка курсора в конец слова
  * @return Number position
 */
+function replaceAllWords(sub, replacement, matchCase) {
+	
+}
+/**
+ * @description Замена слова sub ближайшего к курсору словом replacement и установка курсора в конец слова
+ * @return Number position
+*/
 function replaceWordAndSetCaretOnFoundWord(sub, replacement, pos, matchCase) {
 	var start = getEditorCaretPosition(),
 		i, head, tail,

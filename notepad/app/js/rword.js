@@ -93,12 +93,11 @@ replaceWordDialog.prototype.onReplaceClick = function(e){
 replaceWordDialog.prototype.onReplaceAllClick = function() {
 	e.preventDefault();
 	//это базовая функция определена в tabeditor.js
-	/*replaceWordAndSetCaretOnFoundWord(
+	replaceAllWords(
 		oReplaceWordDialog.iFindWord.val(),
 		oReplaceWordDialog.iReplaceWord.val(),
-		oReplaceWordDialog._pos,
 		oReplaceWordDialog.bMatchCase.prop('checked')
-	);*/
+	);
 	return false;
 }
 /**

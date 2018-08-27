@@ -59,6 +59,7 @@ replaceWordDialog.prototype.createView = function() {
 	this.bReplaceWord.click(this.onReplaceClick);
 	this.bReplaceAllWord.click(this.onReplaceAllClick);
 	this.bCancel.click(this.onCancelClick);
+	this.iReplaceWord.click(function(e){e.preventDefault(); e.stopPropagation(); o.setActive();});
 }
 /**
  * @description Обработка нажатия кнопки Find
@@ -90,7 +91,7 @@ replaceWordDialog.prototype.onReplaceClick = function(e){
 /**
  * @description Обработка нажатия кнопки Replace All
 */
-replaceWordDialog.prototype.onReplaceAllClick = function() {
+replaceWordDialog.prototype.onReplaceAllClick = function(e) {
 	e.preventDefault();
 	//это базовая функция определена в tabeditor.js
 	replaceAllWords(

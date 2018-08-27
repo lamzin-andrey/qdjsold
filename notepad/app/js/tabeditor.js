@@ -68,7 +68,12 @@
 			fileExtensions = '*.cpp *.txt *.php *.js *.sh *.as',
 			lastLocation = '';
 			//DefaultContentFunctions = _getStdMethods();
-		window.SiEd = {};
+		window.SiEd = {
+			/** @see unredo.js::getEditorCurrentFile() */
+			_currentTabeditor : 0
+		};
+		//defined in unredo.js
+		initinitHistoryArray();
 		if (!$(mid)[0]) {
 			return;
 		}
@@ -451,7 +456,44 @@ function getEditorCursorData() {
  * @return Number position
 */
 function replaceAllWords(sub, replacement, matchCase) {
-	
+	var s = getEditorContent(), i, strt = 0, head, tail, n = 0, last, rLen, subLen, lstr, lSub;
+	rLen = replacement.length;
+	subLen = sub.length;
+	if (matchCase) {
+		last = s.lastIndexOf(sub);
+		i = s.indexOf(sub);
+		while(~i) {
+			s = s.replace(sub, replacement);
+			i = s.indexOf(sub, i + rLen);
+			n++;
+		}
+		//вычисляем позицию курсора
+		i = last + (n - 1) * (rLen - subLen);
+		setEditorContent(s);
+		setEdfitorCaretPositionAndScrollViewport(i);
+		setTimeout(showReplaceDlg, 200);
+	} else {
+		lstr = s.toLowerCase();
+		lSub = sub.toLowerCase();
+		last = lstr.lastIndexOf(lSub);
+		i = lstr.indexOf(lSub);
+		while(~i) {
+			lstr = lstr.replace(lSub, replacement);
+			head = s.substring(0, i);
+			tail = s.substring(i + subLen);
+			s = head + replacement + tail;
+			i = lstr.indexOf(lSub, i + rLen);
+			n++;
+		}
+		//вычисляем позицию курсора
+		i = last + (n - 1) * (rLen - subLen);
+		setEditorContent(s);
+		setEdfitorCaretPositionAndScrollViewport(i);
+		setTimeout(showReplaceDlg, 200);
+	}
+	SiEd.lastSubstr = sub;
+	SiEd.lastReplacement = replacement;
+	SiEd.countReplacement = n;
 }
 /**
  * @description Замена слова sub ближайшего к курсору словом replacement и установка курсора в конец слова
@@ -666,8 +708,18 @@ function dbg(s) {
 	$('#dbg').text(s);
 }
 
+function defTrue(v){
+	if (S(v) == 'undefined') {
+		return true;
+	}
+	return v;
+}
+function S(v) {
+	return String(v);
+}
 function showError(s) {
 	alert(s);
 }
+
 //============ / Простой редактор кода==================================
 $(initSampleTextEditor);

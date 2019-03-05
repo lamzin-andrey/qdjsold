@@ -31,15 +31,16 @@ function onMessage(e) {
 		//document.body.innerHTML = e.data;
 	}
 	n++;
-	if (n > 3600 && !startKill) {
+	if (n > 30 && !startKill) {
+		n = 0;
 		startKill = true;
-		Exec.exec(Qt.appDir() + '/../capslock.sh &', 'onStartNew');
+		/*Exec.exec(Qt.appDir() + '/../capslock.sh &', 'onStartNew');
 		setTimeout(function(){
 			Qt.quit();
-		}, 10*1000/*10000*/);
+		}, 10*1000);/**/ 
 	}
 }
 
 function onStartNew() {
-	Qt.quit();
+	//Qt.quit();
 }

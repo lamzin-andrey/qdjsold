@@ -1,0 +1,6 @@
+ffmpeg -i 01.mp4 -c:v libx264 -pix_fmt yuv420p 011.avi
+
+# с выводом в файл
+ffmpeg -i 01.mp4 -c:v libx264 -pix_fmt yuv420p zapekanka_s_tvorogom.avi 1>/home/andrey/log.log 2>&1
+
+# zapekanka_s_tvorogom

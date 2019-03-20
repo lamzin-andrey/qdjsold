@@ -92,10 +92,10 @@ function MoonPhase() {
 	*/
 	function setImage(n) {
 		var img = e('mi'), transform = 0;
-		if (n > 30) {
+		/*if (n > 30) {
 			n = 30 - 15;
 			transform = 1;
-		}
+		}*/
 		e('danger').style.display = 'none';
 		img.onerror = function() {
 			e('danger').style.display = null;

@@ -129,9 +129,9 @@ function MoonPhase() {
 		//Здесь -15 потому что точка отсчёта полнолуние
 		var k = isFull ? -15 : 0, s;
 		k = Math.round(n / (24 * 3600) ) + k;
+		k = k < 0 ? k + 30 : k;
 		return k;
 	}
 	function e(i){return document.getElementById(i);}
 }
-
 window.onload = MoonPhase;

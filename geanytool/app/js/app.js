@@ -2,8 +2,14 @@ function Camel2Snake() {
 	function tpl() {
 		var s = '<input id="in" rows="10" style="width:99%">\
 		<input id="out" type="text" style="width:99%">\
-		<p style="text-align:right;margin:0px; padding:0px;">\
+		<!--p style="text-align:right;margin:0px; padding:0px;">\
 		<input type="button" id="run" value="ok">\
+		</p-->\
+		<p style="text-align:left; margin:0px; padding:0px;">\
+		<p style="text-align:left; margin:0px; padding:0px;color:gray;">\
+		int $nCompanyId, string $stamp, float $nLat, float $nLng) : StdClass\
+		</p>\
+		<textarea id="outDesc" style="resize:none; width:99%;"></textarea>\
 		</p>\
 		<p style="text-align:left; margin:0px; padding:0px;">\
 		<input type="button" id="menu" value="Menu">\
@@ -22,6 +28,43 @@ function Camel2Snake() {
 			Qt.quit();
 		}
 	}
+	/**
+	 * @description
+	 * @param int $nCompanyId
+	 * @param string $stamp
+	 * @param float $nLat
+	 * @param float $nLng
+	 * @return StdClass
+	*/
+
+	$('#outDesc')[0].onkeydown = function(e) {
+		if (e.keyCode == 13) {
+			var rTpl = '/**\n\t * @description\n{content}\n\t*/';
+			var paramTpl = '@param {s}', retTpl = '@return {s}', data = $('#outDesc').val(), i, a,
+			isHasReturn = 0, sReturn = '', sParam = '';
+			a = data.split(') : ');
+			if (a.length == 2) {
+				isHasReturn = 1;
+				sReturn = '\t * ' + retTpl.replace('{s}', a[1].trim()) + '\n';
+				data = a[0].trim();
+			} else {
+				data = data.trim();
+			}
+			a = data.split(',');
+			for (i = 0; i < a.length; i++) {
+				sParam += '\t * ' + paramTpl.replace('{s}', a[i].trim()) + '\n';
+			}
+			if (isHasReturn) {
+				sParam += sReturn;
+			}
+			sParam = rTpl.replace('{content}', sParam);
+			$('#outDesc').val(sParam);
+			setTimeout(function(){
+				$('#outDesc')[0].select();
+			}, 200);
+		}
+	}
+	
 	$('#in')[0].onkeydown = function() {
 		setTimeout(function() {
 			var a = $('#in').val(), i, r = '';

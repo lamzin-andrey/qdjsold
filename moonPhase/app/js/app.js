@@ -82,43 +82,22 @@ function MoonPhase() {
 	}
 	
 	function writeln(s, n) {
-		n = getDay(n);
+		n = getHalfDay(n);
 		e('text').innerHTML = s;
 		setImage(n);
 	}
 	/**
 	 * @description Устанавливает изображение фазы луны
-	 * @param {Number} n сколько земных суток прошло после новолунияя
+	 * @param {Number} n сколько земных "полусуток" прошло после новолунияя
 	*/
 	function setImage(n) {
-		var img = e('mi'), transform = 0;
-		/*if (n > 30) {
-			n = 30 - 15;
-			transform = 1;
-		}*/
+		var img = e('mi');
 		e('danger').style.display = 'none';
 		img.onerror = function() {
 			e('danger').style.display = null;
-			if (n > 12) {
-				n = 12;
-			}
-			if (n < 7) {
-				n = 7;
-			}
 			img.src = './i/m' + n + '.gif';
-			if (transform) {
-				img.style.transform = 'scale(-1, 1)';
-			} else {
-				img.style.transform = null;
-			}
 		}
-		
 		img.src = './i/m' + n + '.gif';
-		if (transform) {
-			img.style.transform = 'scale(-1, 1)';
-		} else {
-			img.style.transform = null;
-		}
 	}
 	/**
 	 * @description Вычисляет, сколько земных суток прошло после новолуния
@@ -130,6 +109,18 @@ function MoonPhase() {
 		var k = isFull ? -15 : 0, s;
 		k = Math.round(n / (24 * 3600) ) + k;
 		k = k < 0 ? k + 30 : k;
+		return k;
+	}
+	/**
+	 * @description Вычисляет, сколько земных "полусуток" прошло после новолуния
+	 * @param {Number} n количество секунд после новолуния
+	 * @return Number номер земных суток после новолуния
+	*/
+	function getHalfDay(n) {
+		//Здесь -30 потому что точка отсчёта полнолуние
+		var k = isFull ? -30 : 0, s;
+		k = Math.round(n / (12 * 3600) ) + k;
+		k = k < 0 ? k + 60 : k;
 		return k;
 	}
 	function e(i){return document.getElementById(i);}

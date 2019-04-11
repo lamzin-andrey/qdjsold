@@ -42,10 +42,155 @@ getSwfSize.
 Найти аналог Qt.zlibdecompress или как-то так, не хочется зависеть ещё и от питона...
 В сжатом файле данные разжимать начиная с 8 байта
 
+Возможно тут есть что-то путное на php
+https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=8&cad=rja&uact=8&ved=2ahUKEwiL69mDmLLhAhXlwYsKHRsmAU0QFjAHegQIBRAB&url=https%3A%2F%2Fphp.net%2Fmanual%2Fru%2Ffunction.gzcompress.php&usg=AOvVaw0IW8_18vFMvVjssC4Ie-mH
+Искать по " I tested this by uncompressing compressed SWF file and then compressed th"
 
+Главное что не даёт покоя: это же обычный gz который есть в любой бубунте!
+И поидее как-то можно распотрошить его обычным вызовом gzip
 
- 
- 
+testungz.php - справляется, надо только аккуратно первые 8 байт выпилить 
+
+Пример кода на cpp
+
+gzFile inFileZ = gzopen(fileName, "rb");
+if (inFileZ == NULL) {
+    printf("Error: Failed to gzopen %s\n", filename);
+    exit(0);
+}
+unsigned char unzipBuffer[8192];
+unsigned int unzippedBytes;
+std::vector<unsigned char> unzippedData;
+while (true) {
+    unzippedBytes = gzread(inFileZ, unzipBuffer, 8192);
+    if (unzippedBytes > 0) {
+        unzippedData.insert(unzippedData.end(), unzipBuffer, unzipBuffer + unzippedBytes);
+    } else {
+        break;
+    }
+}
+gzclose(inFileZ);
+
+Но делать буду скорее всего как тут
+https://eax.me/zlib/
+а рабочий код он выложил тут:
+https://github.com/afiskon/c-zlib-example
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <errno.h>
+#include <limits.h>
+#include <zlib.h>
+
+int main(int argc, char* argv[])
+{
+	int res;
+
+	if(argc < 2)
+	{
+		fprintf(stderr, "Usage: %s <fname>\n", argv[0]);
+		return 1;
+	}
+
+	char* fname = argv[1];
+
+	struct stat file_stat;
+	res = stat(fname, &file_stat);
+	if(res == -1)
+	{
+		fprintf(stderr, "stat(...) failed, errno = %d\n", errno);
+		return 1;
+	}
+
+	size_t temp_file_size = (size_t)file_stat.st_size;
+	if(temp_file_size >= INT_MAX)
+	{
+		fprintf(stderr, "Error: filze_size >= INT_MAX (%d)\n", INT_MAX);
+		return 1;
+	}
+
+	int file_size = (int)temp_file_size;
+	int buff_size = file_size + 1;
+	void* file_buff = malloc(buff_size);
+	if(file_buff == NULL)
+	{
+		fprintf(stderr, "malloc(buff_size) failed, buff_size = %d\n",
+			file_size);
+		return 1;
+	}
+
+	int fid = open(fname, O_RDONLY);
+	if(fid == -1)
+	{
+		fprintf(stderr, "open(...) failed, errno = %d\n", errno);
+		free(file_buff);
+		return 1;
+	}
+
+	if(read(fid, file_buff, file_size) != file_size)
+	{
+		fprintf(stderr, "read(...) failed, errno = %d\n", errno);
+		free(file_buff);
+		close(fid);
+		return 1;
+	}
+
+	close(fid);
+
+	uLongf compress_buff_size = compressBound(file_size);
+	void* compress_buff = malloc(compress_buff_size);
+	if(compress_buff == NULL)
+	{
+		fprintf(stderr,
+			"malloc(compress_buff_size) failed, "
+			"compress_buff_size = %lu\n",
+			compress_buff_size);
+		free(file_buff);
+		return 1;
+	}
+
+	uLongf compressed_size = compress_buff_size;
+	res = compress(compress_buff, &compressed_size, file_buff, file_size);
+	if(res != Z_OK)
+	{
+		fprintf(stderr, "compress(...) failed, res = %d\n", res);
+		free(compress_buff);
+		free(file_buff);
+		return 1;
+	}
+
+	memset(file_buff, 0, buff_size);
+	uLongf decompressed_size = (uLongf)file_size;
+	res = uncompress(file_buff, &decompressed_size,
+		compress_buff, compressed_size);
+	if(res != Z_OK)
+	{
+		fprintf(stderr, "uncompress(...) failed, res = %d\n", res);
+		free(compress_buff);
+		free(file_buff);
+		return 1;
+	}
+
+	printf(
+		"%s\n----------------\n"
+		"File size: %d, compress_buff_size: %lu, compressed_size: %lu, "
+		"decompressed_size: %lu\n",
+		(char*)file_buff, file_size, compress_buff_size, compressed_size,
+		decompressed_size);
+
+	free(compress_buff);
+	free(file_buff);
+}
+
+------------------------------------------------------------------------ 
+Оставляю для общего развития
+
 Декомпресс на AS (пока с ним не справился, скорее всего дело элементарно в том, что это алгоритм разжатия LZMAа в моих флешках используется zlib)
 
  
@@ -59,4 +204,6 @@ var data:ByteArray = File.readByteArray(file) data.endian = "littleEndian" var v
 
 data.position = 17 data.readBytes(udata,13,data.length-data.position) udata.position=0 csize = udata.length udata.uncompress(CompressionAlgorithm.LZMA) infoPrint("decompressed swf "+csize+" -> "+udata.length) /*var swf:Swf =*/ new Swf(udata) break
 
-+ use lzma -df
+
+
+

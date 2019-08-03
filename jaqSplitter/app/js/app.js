@@ -3,7 +3,6 @@ function log(s) {
 	e('log').innerHTML += '<div style="color:blue;">' + s + '</div>';
 }
 function onClickSelectTextFile() {
-	alert('I call');
 	var filepath = Qt.openFileDialog('Select text file utf-8 encoding', lastDir(), '*.txt'),
 		s, i, q = '',
 		//size source file

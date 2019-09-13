@@ -1,3 +1,16 @@
+Итак, 13 09 2019
+
+Распаковывать gz пока будем через запуск php скрипта.
+
+Нужно добавить аргумент offset, limit в функцию Qt.readFileAsBinaryString.
+Также нужна Qt.copyFileBytes(src, dest, srcOffset, srcLimit = -1); //if -1 - бесконечно.
+
+
+
+
+
+
+------------
 File libpepflashplayer.so
 из архива flash_player_ppapi_linux.x86_64-2019-03-27.tar.gz (дата в конец добавлена мной)
 просто скопирован в /usr/lib
@@ -187,6 +200,9 @@ int main(int argc, char* argv[])
 	free(compress_buff);
 	free(file_buff);
 }
+
+
+Тем не менее пока делаю с использованием php
 
 ------------------------------------------------------------------------ 
 Оставляю для общего развития

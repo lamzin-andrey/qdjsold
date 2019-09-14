@@ -1,3 +1,4 @@
 #! /bin/bash
-cd /home/andrey/hdata/programs/my/qdjs/jaqMp3cut/app;
-avconv -i 0.mp3 -ss 00:00:00 -t 00:00:05 0-out.mp3
+cd /home/andrey/hdata/programs/my/qdjs/jaqVideoConverter/app;
+rm -f maski-out.avi;
+ffmpeg -i maski.mp4 -c:v libx264 -threads 3 -pix_fmt yuv420p maski-out.avi 1>/home/andrey/hdata/programs/my/qdjs/jaqVideoConverter/app/maski-out.avi.log 2>&1 

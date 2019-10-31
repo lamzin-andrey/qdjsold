@@ -1,1 +1,1 @@
-/home/andrey/Загрузки
+/home/andrey/tmp

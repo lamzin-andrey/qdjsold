@@ -720,6 +720,29 @@ function S(v) {
 function showError(s) {
 	alert(s);
 }
+/**
+ * @description Тестирую, сколько времени потребуется, чтобы распарсить список методов при известном имени класса переменной PHP
+*/
+function getMethodList() {
+	var ml = new PhpClassMethodsList(),
+		sProjectDir = '',
+		sClassName = '',
+		sSubstring = '',
+		aResult,
+		sOutputFile,
+		list,
+		i,
+		s = '',
+		startTime,
+		endTime;
+	startTime = time();
+	
+	list = ml.parse(sProjectDir, sClassName, sSubstring);
+	
+	s = list.join('\n') + '\n\n============Time: ' + String( (time() - startTime)  + ' s');
+	PHP.file_put_contents('/home/andrey/log.log', s);
+	
+}
 
 //============ / Простой редактор кода==================================
 $(initSampleTextEditor);

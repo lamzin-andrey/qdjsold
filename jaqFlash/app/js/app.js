@@ -94,6 +94,7 @@ function onClickSelectSwfFile()
 	var s = Qt.openFileDialog('Select swf file', Qt.appDir(), '*.swf'),
 		sDir = getFolder(s), shell;
 	//копировать в файл с именем 0.swf.gz - надо что-то придумать побыстрее
+	// а именно dd if=src of=dest skip=1 ibs=1
 	Qt.copyFile(s, sDir + '/0.swf.gz', 8, -1);
 	//запустить testungz.php
 	var shell = sDir + '/rununpack.sh';

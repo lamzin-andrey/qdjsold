@@ -93,6 +93,9 @@ function onClickSelectSwfFile(sPath)
 		s = sPath;
 	} else {
 		s = Qt.openFileDialog('Select swf file', Qt.appDir(), '*.swf');
+		if (!s) {
+			return;
+		}
 	}
 	sDir = getFolder(s);
 	firstByte = Qt.readFileAsBinaryString(s, 0, 1);

@@ -87,14 +87,43 @@ function getSwfSize(data) {
 */
 function onClickSelectSwfFile()
 {
+	//TODO считывать нулевой байт, если он C тогда все это.
+	//Иначе 
+	// buf = a.join(',') + ',' + Qt.readFileAsBinaryString(s, 0, 32),
+	// и сразу getSwfSize(buf)
 	var s = Qt.openFileDialog('Select swf file', Qt.appDir(), '*.swf'),
-		buf = Qt.readFileAsBinaryString(s, 0, 32);
-	Qt.copyFile(s, s + '.test', 0, 10);
-	e('iFiledata').value = buf;
+		sDir = getFolder(s), shell;
+	//копировать в файл с именем 0.swf.gz - надо что-то придумать побыстрее
+	Qt.copyFile(s, sDir + '/0.swf.gz', 8, -1);
+	//запустить testungz.php
+	var shell = sDir + '/rununpack.sh';
+	window.sDir = sDir;
+	PHP.file_put_contents(shell, '#! /bin/bash\nphp ' + sDir + '/testungz.php\n');
+	PHP.exec(shell, 'onUnpackFin', 'Z', 'Z');
 	
 }
+function onUnpackFin(stdout, stderr){
+	log('unpack...');
+	//из распакованного (1.php.swf) получить 32 байта , перед ними написать 8 нулей и отдать getSwfSize
+	var a = new Array(8), 
+		buf = a.join(',') + ',' + Qt.readFileAsBinaryString(sDir + '/1.php.swf', 0, 32),
+		oSize;
+	e('iFiledata').value = buf;
+	oSize = getSwfSize(buf);
+}
+function Z(s){
+	//alert('o = ');
+}
+
+function getFolder(s){
+	var a = s.split('/'), i, b = [];
+	for (i = 0; i < a.length - 1; i++) {
+		b.push(a[i]);
+	}
+	return b.join('/');
+}
 /**
- *
+ * Это пляски с бубном, к которым хочется потом вернуться
  * @param {Array} Array of Number data
 */
 function decompressSwc(data) {

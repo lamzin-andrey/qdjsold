@@ -1,12 +1,10 @@
 var d = document;
+var debug = true;
+//Вынести в настройки
+window.yCorrect = 20;
+window.xCorrect = 0;
 function e(i){return d.getElementById(i);}
-function log(s) {
-	e('log').innerHTML += '<div style="color:blue;">' + s + '</div>';
-}
-function testGetSwfSize() {
-	//getSwfSize(example);
-	e('bSelectSwf').onclick = onClickSelectSwfFile;
-}
+
 
 function _toFullByte(n) {
 	var n = Number(n).toString(2);
@@ -85,32 +83,131 @@ function getSwfSize(data) {
 /**
  * @description ПОка просто считываем байты в текстовое поле
 */
-function onClickSelectSwfFile()
+function onClickSelectSwfFile(sPath)
 {
-	//TODO считывать нулевой байт, если он C тогда все это.
-	//Иначе 
-	// buf = a.join(',') + ',' + Qt.readFileAsBinaryString(s, 0, 32),
-	// и сразу getSwfSize(buf)
-	var s = Qt.openFileDialog('Select swf file', Qt.appDir(), '*.swf'),
-		sDir = getFolder(s), shell;
-	//копировать в файл с именем 0.swf.gz - надо что-то придумать побыстрее
-	// а именно dd if=src of=dest skip=1 ibs=1
-	Qt.copyFile(s, sDir + '/0.swf.gz', 8, -1);
+	var s, firstByte,
+		/** @var oSize {w, h} */
+		oSize,
+		sDir, shell, dd;
+	if (sPath) {
+		s = sPath;
+	} else {
+		s = Qt.openFileDialog('Select swf file', Qt.appDir(), '*.swf');
+	}
+	sDir = getFolder(s);
+	firstByte = Qt.readFileAsBinaryString(s, 0, 1);
+	window.fileForUnzip = Qt.appDir() + '/0.swf.gz';
+	window.unzippedFile = Qt.appDir() + '/1.php.swf';
+	window.swfPath = s;
+	if (firstByte == 70) {
+		s = Qt.readFileAsBinaryString(s, 0, 32);
+		oSize = getSwfSize(s);
+		setSwfOnPage(oSize.w, oSize.h, window.swfPath);
+		return;
+	}
+	//Qt.copyFile(s, sDir + '/0.swf.gz', 8, -1); - это очень медленно, надо будет более продвинуто сделать.
 	//запустить testungz.php
-	var shell = sDir + '/rununpack.sh';
+	shell = Qt.appDir() + '/rununpack.sh';
 	window.sDir = sDir;
-	PHP.file_put_contents(shell, '#! /bin/bash\nphp ' + sDir + '/testungz.php\n');
-	PHP.exec(shell, 'onUnpackFin', 'Z', 'Z');
+	dd = 'dd if="' + s + '" of="' + fileForUnzip + '" skip=8 ibs=1';
+	PHP.file_put_contents(shell, '#! /bin/bash\n' + dd + '\nphp ' + Qt.appDir() + '/testungz.php\n');
+	PHP.exec(shell, 'onUnpackFin', 'Z', 'onUnpackError');
+}
+
+function setSwfOnPage(w, h, swfPath) {
+	if (w < 0 || h < 0 || w > 3000 || h > 2000) {
+		w = 480;
+		h = 320;
+	} else {
+		window.baseW = w;
+		window.baseH = h;
+	}
+	d.getElementsByTagName('body')[0].innerHTML = '';
+	//id=swf0 or swfKa
+	var swfObject = e('swfKa');
+	if (swfObject) {
+		swfObject.setAttribute('width', w);
+		swfObject.setAttribute('height', h);
+		swfObject.setAttribute('src', swfPath);
+	} else {
+		d.getElementsByTagName('body')[0].innerHTML = swfTpl(w, h, swfPath);
+	}
 	
+	window.pW =  w + window.xCorrect;
+	window.pH =  h + window.yCorrect;
+	setTimeout(resizePlayer, 200);
+}
+function onResizeWindow(){
+	if (!window.baseW || window.skipResizeListener) {
+		if (window.skipResizeListener) {
+			window.skipResizeListener = false;
+		}
+		return;
+	}
+	
+	var oV = getViewport(),
+		vW = oV.w,
+		vH = oV.h, sc;
+	
+	if (vW > baseW || vH > baseH) {
+		if (vW > baseW) {
+			sc = baseW / vW;
+		} else {
+			sc = baseH / vH;
+		}
+		window.pW = Math.round(baseW / sc);
+		window.pH = Math.round(baseH / sc);
+		setTimeout(function(){
+			window.skipResizeListener = true;
+			var swfObject = e('swfKa');
+			if (swfObject) {
+				swfObject.setAttribute('width', window.pW);
+				swfObject.setAttribute('height', window.pH);
+				window.pW += xCorrect;
+				window.pH += yCorrect;
+				resizePlayer();
+			}
+		}, 200);
+	}
+}
+//getviewport
+window.getViewport = function() {
+	var W = window, D = document;
+	var w = W.innerWidth, h = W.innerHeight;
+	if (!w && D.documentElement && D.documentElement.clientWidth) {
+		w = D.documentElement.clientWidth;
+	} else if (!w) {
+		w = D.getElementsByTagName('body')[0].clientWidth;
+	}
+	if (!h && D.documentElement && D.documentElement.clientHeight) {
+		h = D.documentElement.clientHeight;
+	} else if (!h) {
+		h = D.getElementsByTagName('body')[0].clientHeight;
+	}
+	return {w:w, h:h};
+}
+
+function resizePlayer(){
+	Qt.resizeTo(pW, pH);
+}
+
+
+function onUnpackError(stderr){
+	if (~stderr.indexOf('dd') || ~stderr.indexOf('php')) {
+		alert('For normal run flash application please install php and dd. Run\nsudo apt-get install dd php\n' + 
+			'Error text: \n' + stderr);
+	}
 }
 function onUnpackFin(stdout, stderr){
 	log('unpack...');
 	//из распакованного (1.php.swf) получить 32 байта , перед ними написать 8 нулей и отдать getSwfSize
 	var a = new Array(8), 
-		buf = a.join(',') + ',' + Qt.readFileAsBinaryString(sDir + '/1.php.swf', 0, 32),
+		buf = a.join(',') + ',' + Qt.readFileAsBinaryString(unzippedFile, 0, 32),
 		oSize;
-	e('iFiledata').value = buf;
 	oSize = getSwfSize(buf);
+	PHP.unlink(unzippedFile);
+	PHP.unlink(fileForUnzip);
+	setSwfOnPage(oSize.w, oSize.h, window.swfPath);
 }
 function Z(s){
 	//alert('o = ');
@@ -177,4 +274,27 @@ function readUnsignedInt(aData, offset) {
 	return parseInt(s, 2);
 }
 
-window.onload=testGetSwfSize;
+
+
+function log(s) {
+	if (debug) {
+		//e('log').innerHTML += '<div style="color:blue;">' + s + '</div>';
+		PHP.file_put_contents(Qt.appDir() + '/dev.log', s + "\n", 1);
+	}
+	
+}
+/**
+ * id=swf0 or swfKa
+*/
+function swfTpl(w, h, sPath) {
+	var s = '<object style="padding:0; margin:0;" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0" id="swf0"			width="' + w + '"			height="' + h + '" align="middle">		<param name="allowScriptAccess" value="sameDomain">		<param name="flashVars" value="none">		<param name="allowFullScreen" value="false">		<param name="bgcolor" value="#FFF">		<param name="movie" value="' + sPath + '">		<param name="quality" value="hight">		<embed style="padding:0px; margin:0px;"  src="' + sPath + '" quality="hight" bgcolor="#FFF" 			flashvars="" 			name="swfKa" 			id="swfKa" 			allowscriptaccess="sameDomain" 			allowfullscreen="true"			type="application/x-shockwave-flash"			pluginspage="http://www.macromedia.com/go/getflashplayer" width="' + w + '" height="' + h + '" >		</object>';
+	return s;
+}
+window.onresize = onResizeWindow;
+window.onload = onLoad;
+function onLoad() {
+	var args = Qt.getArgs();
+	if (args.length > 0) {
+		onClickSelectSwfFile(args[0]);
+	}
+}

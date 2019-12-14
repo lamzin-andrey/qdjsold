@@ -1,8 +1,18 @@
 var d = document;
-var debug = true;
+var debug = false;
+
 //Вынести в настройки
 window.yCorrect = 20;
 window.xCorrect = 0;
+
+/** @var baseW  - реальный размер ролика, ширина */
+/** @var baseH  - реальный размер ролика, высота  */
+
+/** @var pW  - ширина, необходимо вычислить перед запуском resizePlayer */
+/** @var pH  - высота, необходимо вычислить перед запуском resizePlayer  */
+
+/** @var needFullscreen  - устанавливается только при успешном чтении из файла настроек в onClickSelectSwfFile. Используется только в resizePlayer где тут же сбрасывается. */
+
 function e(i){return d.getElementById(i);}
 
 
@@ -85,6 +95,9 @@ function getSwfSize(data) {
 */
 function onClickSelectSwfFile(sPath)
 {
+	//По этому признаку определяем, удалось ли получить размер экрана ролика
+	window.baseW = 0;
+	window.baseH = 0;
 	var s, firstByte,
 		/** @var oSize {w, h} */
 		oSize,
@@ -92,16 +105,27 @@ function onClickSelectSwfFile(sPath)
 	if (sPath) {
 		s = sPath;
 	} else {
-		s = Qt.openFileDialog('Select swf file', Qt.appDir(), '*.swf');
+		//s = Qt.openFileDialog('Select swf file', getRecentDir(), '*.swf');
+		s = jqlOpenFileDialog('Select swf file', '*.swf');
 		if (!s) {
 			return;
 		}
 	}
+	window.swfPath = s;
+	var oFileInfo = RecentFileInfo.getFileInfo(s);
+	if (oFileInfo.w) {
+		if (oFileInfo.fs) {
+			window.needFullscreen = true;
+		}
+		setSwfOnPage(oFileInfo.w, oFileInfo.h, s);
+		return;
+	}
+	
 	sDir = getFolder(s);
 	firstByte = Qt.readFileAsBinaryString(s, 0, 1);
 	window.fileForUnzip = Qt.appDir() + '/0.swf.gz';
 	window.unzippedFile = Qt.appDir() + '/1.php.swf';
-	window.swfPath = s;
+	
 	if (firstByte == 70) {
 		s = Qt.readFileAsBinaryString(s, 0, 32);
 		oSize = getSwfSize(s);
@@ -118,12 +142,24 @@ function onClickSelectSwfFile(sPath)
 }
 
 function setSwfOnPage(w, h, swfPath) {
+	window.mainMenuIsHide = false;
 	if (w < 0 || h < 0 || w > 3000 || h > 2000) {
 		w = 480;
 		h = 320;
 	} else {
 		window.baseW = w;
 		window.baseH = h;
+	}
+	if (window.baseW) {
+		var oInfo = RecentFileInfo.getFileInfo(swfPath);
+		if (!oInfo.w) {
+			oInfo = {
+				w: baseW,
+				h: baseH,
+				fs: false
+			};
+			RecentFileInfo.setFileInfo(swfPath, oInfo);
+		}
 	}
 	d.getElementsByTagName('body')[0].innerHTML = '';
 	//id=swf0 or swfKa
@@ -192,6 +228,12 @@ window.getViewport = function() {
 
 function resizePlayer(){
 	Qt.resizeTo(pW, pH);
+	if (window.needFullscreen) {
+		window.needFullscreen = false;
+		setTimeout(function(){
+			onClickShowFullscreen(false);
+		}, 200);
+	}
 }
 
 
@@ -293,8 +335,55 @@ function swfTpl(w, h, sPath) {
 	var s = '<object style="padding:0; margin:0;" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0" id="swf0"			width="' + w + '"			height="' + h + '" align="middle">		<param name="allowScriptAccess" value="sameDomain">		<param name="flashVars" value="none">		<param name="allowFullScreen" value="false">		<param name="bgcolor" value="#FFF">		<param name="movie" value="' + sPath + '">		<param name="quality" value="hight">		<embed style="padding:0px; margin:0px;"  src="' + sPath + '" quality="hight" bgcolor="#FFF" 			flashvars="" 			name="swfKa" 			id="swfKa" 			allowscriptaccess="sameDomain" 			allowfullscreen="true"			type="application/x-shockwave-flash"			pluginspage="http://www.macromedia.com/go/getflashplayer" width="' + w + '" height="' + h + '" >		</object>';
 	return s;
 }
+function onKeyUp(evt) {
+	if (evt.ctrlKey) {
+		switch(evt.keyCode) {
+			case 70:
+				onClickShowFullscreen();
+				break;
+			case 79:
+				onClickSelectSwfFile();
+				break;
+			case 81:
+				onClickExitMenu();
+				break;
+		}
+		
+	}
+	if (evt.keyCode == 27 && window.mainMenuIsHide) {
+		exitFromFullscreen();
+	}
+}
+function exitFromFullscreen(){
+	window.mainMenuIsHide = false;
+	Qt.showMainMenu();
+	Qt.showNormal();
+	window.swfPath;
+	var o = RecentFileInfo.getFileInfo(window.swfPath);
+	if (o.w) {
+		o.fs = false;
+		RecentFileInfo.setFileInfo(window.swfPath, o);
+	}
+}
+function onClickShowFullscreen(bSaveFullscreenInSetting){
+	bSaveFullscreenInSetting = String(bSaveFullscreenInSetting) == 'undefined' ? true : false;
+	window.mainMenuIsHide = true;
+	Qt.hideMainMenu();
+	Qt.showFullScreen();
+	if (bSaveFullscreenInSetting) {
+		var oInfo = RecentFileInfo.getFileInfo(window.swfPath);
+		if (oInfo.w) {
+			oInfo.fs = true;
+			RecentFileInfo.setFileInfo(window.swfPath, oInfo);
+		}
+	}
+}
+function onClickExitMenu() {
+	Qt.quit();
+}
 window.onresize = onResizeWindow;
 window.onload = onLoad;
+window.onkeyup = onKeyUp;
 function onLoad() {
 	var args = Qt.getArgs();
 	if (args.length > 0) {

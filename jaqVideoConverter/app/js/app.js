@@ -11,6 +11,7 @@ function jmp3cutOnConvertClick() {
 	}
 	if (W.filePath && PHP.file_exists(W.filePath)) {
 		var cmd = '', dir, name = '', outfile;
+		PHP.file_put_contents(jmp4convGetLogFilename(), '');
 		//ffmpeg -i 01.mp4 -c:v libx264 -pix_fmt yuv420p zapekanka_s_tvorogom.avi 1>/home/andrey/log.log 2>&1
 		cmd = '#! /bin/bash\ncd ' + jmp3cutGetDir() + ';\nrm -f ' + jmp3cutGetOutfile() +
 			';\nffmpeg -i '	+ jmp3cutGetName() + ' -c:v libx264 -threads 3 -pix_fmt yuv420p ' +
@@ -185,7 +186,9 @@ function jmp4convAddFileInfoBlock() {
 function jmp4convOnClickRemoveBtn() {
 	if (W.convertProcIsRun) {
 		W.isInterrupt = 1;
-		PHP.exec('kill ' + sysId + '\n', 'on');
+		var cmd = 'kill ' + sysId;
+		PHP.exec(cmd + '\n', 'on');
+		PHP.exec('killall ffmpeg' + '\n', 'on');
 	} else {
 		e('hFileList').innerHTML = '';
 		jmp4convResetParams();

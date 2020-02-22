@@ -23,7 +23,7 @@ rm -rf adobe_flashplugin*/
 # unpacking and checking the plugin
 tar xzf $FILENAME || fp_exit_with_error "cannot unpack plugin"
 
-install -m 644 adobe-flashplugin*/i386/libflashplayer.so /usr/lib/flashplugin-installer/
+install -m 644 adobe-flashplugin*/amd64/libflashplayer.so /usr/lib/flashplugin-installer/
 rm -rf adobe-flashplugin*
 
 echo "Flash Plugin installed."

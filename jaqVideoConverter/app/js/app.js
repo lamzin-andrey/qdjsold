@@ -122,7 +122,7 @@ function jmp3cutLastDir() {
 function jmp3cutGetDir() {
 	var a = W.filePath.split('/');
 	a.pop();
-	return a.join('/');
+	return "'" + a.join('/') + "'";
 }
 function jmp3cutGetName() {
 	var a = W.filePath.split('/');

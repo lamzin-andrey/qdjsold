@@ -1,16 +1,35 @@
 function Camel2Snake() {
 	function tpl() {
-		var s = '<input id="in" rows="10" style="width:99%">\
+		var s = '<p style="text-align:left; margin:0px; padding:0px;color:gray;">\
+		int $nCompanyId, string $stamp, float $nLat, float $nLng) : StdClass\
+		</p>\
+		<p style="text-align:left; margin:0px; padding:0px;">\
+		<textarea id="outDesc" style="resize:none; width:99%;"></textarea>\
+		</p>\
+		\
+		<p style="text-align:left; margin:0px; padding:0px;color:gray;">\
+		Введите имя PHP класса\
+		</p>\
+		<p style="text-align:left; margin:0px; padding:0px;">\
+			<input id="iPhpClassName"  style="width:99%">\
+			<div id="hNsError" style="color:#FF0000; display:none;">Не найден composer.json</div>\
+		</p>\
+		<p style="text-align:left; margin:0px; padding:0px;">\
+			<select multiple id="sNamespaces"  style="width:99%; height:50px;">\
+			</select>\
+		</p>\
+		<p style="text-align:left; margin:0px; padding:0px;">\
+			<input id="iPhpNamespaceResult"  style="width:99%">\
+		</p>\
+		<p style="text-align:left; margin:0px; padding:0px;color:gray;">\
+		snake_case to camelCase\
+		</p>\
+		<input id="in" rows="10" style="width:99%">\
 		<input id="out" type="text" style="width:99%">\
 		<!--p style="text-align:right;margin:0px; padding:0px;">\
 		<input type="button" id="run" value="ok">\
 		</p-->\
-		<p style="text-align:left; margin:0px; padding:0px;">\
-		<p style="text-align:left; margin:0px; padding:0px;color:gray;">\
-		int $nCompanyId, string $stamp, float $nLat, float $nLng) : StdClass\
-		</p>\
-		<textarea id="outDesc" style="resize:none; width:99%;"></textarea>\
-		</p>\
+		\
 		<p style="text-align:left; margin:0px; padding:0px;">\
 		<input type="button" id="menu" value="Menu">\
 		</p>\
@@ -18,15 +37,30 @@ function Camel2Snake() {
 		$('#console').html(s);
 	}
 	tpl();
+	
+	window.settingsObject = new SettingsObject('appsettings.json');
+	
+	var nsTool = new NamespacesTool(settingsObject);
 	$('#menu').click(function() {
 		Menu.show();
 	});
-	$('#in').focus();
+	
+	
+	var lastId = settingsObject.storage('lastClickedFile');
+	if ($('#' + lastId)[0]) {
+		$('#' + lastId).focus();
+	} else {
+		$('#in').focus();
+	}
+	
 	window.onkeydown = onQuit;
 	function onQuit(e){
 		if (e.keyCode == 27) {
 			Qt.quit();
 		}
+	}
+	$('#outDesc')[0].onclick = function() {
+		settingsObject.storage('lastClickedFile', 'outDesc');
 	}
 	/**
 	 * @description
@@ -63,6 +97,10 @@ function Camel2Snake() {
 				$('#outDesc')[0].select();
 			}, 200);
 		}
+	}
+	
+	$('#in')[0].onclick = function() {
+		settingsObject.storage('lastClickedFile', 'in');
 	}
 	
 	$('#in')[0].onkeydown = function() {

@@ -8,3 +8,4 @@ Path=/home/andrey/hdata/programs/my/qdjs/moonPhase
 Terminal=false
 StartupNotify=false
 Name[ru]=MoonPhase
+Categories=Game;

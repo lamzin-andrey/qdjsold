@@ -10,3 +10,5 @@ Categories=Game;
 Terminal=false
 StartupNotify=false
 Name[ru]=Flash Player
+Name[en]=Flash Player
+Category=Game;

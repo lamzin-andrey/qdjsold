@@ -147,8 +147,10 @@ function setSwfOnPage(w, h, swfPath) {
 		w = 480;
 		h = 320;
 	} else {
+		//оригинальные размеры
 		window.baseW = w;
 		window.baseH = h;
+		window.flashMovieK = window.baseW / window.baseH;
 	}
 	if (window.baseW) {
 		var oInfo = RecentFileInfo.getFileInfo(swfPath);
@@ -170,6 +172,7 @@ function setSwfOnPage(w, h, swfPath) {
 		swfObject.setAttribute('src', swfPath);
 	} else {
 		d.getElementsByTagName('body')[0].innerHTML = swfTpl(w, h, swfPath);
+		//e('swfplace').innerHTML = swfTpl(w, h, swfPath);
 	}
 	
 	window.pW =  w + window.xCorrect;
@@ -196,6 +199,14 @@ function onResizeWindow(){
 		}
 		window.pW = Math.round(baseW / sc);
 		window.pH = Math.round(baseH / sc);
+		
+		var h = getHByW(window.pW);
+		if( screen.height < window.pH) {
+			var w = getWByH(screen.height);
+			window.pH = screen.height;
+			window.pW = w;
+		}
+		
 		setTimeout(function(){
 			window.skipResizeListener = true;
 			var swfObject = e('swfKa');
@@ -380,6 +391,15 @@ function onClickShowFullscreen(bSaveFullscreenInSetting){
 }
 function onClickExitMenu() {
 	Qt.quit();
+}
+// Возвращает высоту  ролика по заданной ширине.
+function getHByW( w ){
+    return ( w / window.flashMovieK );
+}
+
+function getWByH(h) {
+    var k = window.flashMovieK;
+    return k * h;
 }
 window.onresize = onResizeWindow;
 window.onload = onLoad;

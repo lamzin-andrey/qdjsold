@@ -14,7 +14,7 @@
 	    <link rel="stylesheet" type="text/css" href="./s/g.css" />
 	    <link rel="stylesheet" type="text/css" href="./s/0.css" />
 	    <link rel="stylesheet" type="text/css" href="./s/colors.css" />
-	    <link rel="stylesheet" type="text/css" href="./js/pjs-popupwnd/dev/popupwin.css" />
+	    <link rel="stylesheet" type="text/css" href="./js/vendor/pjs-popupwnd/dev/popupwin.css" />
     </head>
     <body>
 	<div class="screen" id="hMainScreen">
@@ -46,12 +46,23 @@
 		    <input id="iPassword" type="password">
 		</div>
 		<div class="tr">
-		    <input value="Сохранить" id="bSave" type="button" onclick="onClickAddServer()">
+		    <input value="Сохранить" id="bHostSave" type="button" onclick="onClickAddServer()">
 		</div>
 	    </div>
 	</div>
     </body>
-    <script type="text/javascript" src="./js/micron.js" ></script>
-    <script type="text/javascript" src="./js/pjs-popupwnd/popupwin.js" ></script>
-    <script type="text/javascript" src="./js/app.js" ></script>
+    <!-- shared libs  -->
+    <script type="text/javascript" src="./js/vendor/micron.js" ></script>
+    <script type="text/javascript" src="./js/vendor/pjs-popupwnd/popupwin.js" ></script>
+    <script type="text/javascript" src="./js/vendor/objects/recentdir.js" ></script>
+    <script type="text/javascript" src="./js/vendor/objects/settings.js" ></script>
+    <!-- /shared libs  -->
+    
+    <!-- app libs  -->
+    <script type="text/javascript" src="./js/src/objects/hostssaver.js" ></script>
+    <script type="text/javascript" src="./js/src/classes/addHostDlg.js" ></script>
+    
+    <!-- app /libs  -->
+    
+    <script type="text/javascript" src="./js/src/app.js" ></script>
 </html>

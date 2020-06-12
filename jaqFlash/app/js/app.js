@@ -163,7 +163,9 @@ function setSwfOnPage(w, h, swfPath) {
 			RecentFileInfo.setFileInfo(swfPath, oInfo);
 		}
 	}
-	d.getElementsByTagName('body')[0].innerHTML = '';
+	//d.getElementsByTagName('body')[0].innerHTML = '';
+	var swfPlace = e('swfplace');
+	swfPlace.innerHTML = '';
 	//id=swf0 or swfKa
 	var swfObject = e('swfKa');
 	if (swfObject) {
@@ -171,8 +173,8 @@ function setSwfOnPage(w, h, swfPath) {
 		swfObject.setAttribute('height', h);
 		swfObject.setAttribute('src', swfPath);
 	} else {
-		d.getElementsByTagName('body')[0].innerHTML = swfTpl(w, h, swfPath);
-		//e('swfplace').innerHTML = swfTpl(w, h, swfPath);
+		//d.getElementsByTagName('body')[0].innerHTML = swfTpl(w, h, swfPath);
+		swfPlace.innerHTML = swfTpl(w, h, swfPath);
 	}
 	
 	window.pW =  w + window.xCorrect;
@@ -215,7 +217,8 @@ function onResizeWindow(){
 				swfObject.setAttribute('height', window.pH);
 				window.pW += xCorrect;
 				window.pH += yCorrect;
-				resizePlayer();
+				e('swfplace').style.width = window.pW + 'px';
+				//resizePlayer();
 			}
 		}, 200);
 	}
@@ -343,7 +346,11 @@ function log(s) {
  * id=swf0 or swfKa
 */
 function swfTpl(w, h, sPath) {
-	var s = '<object style="padding:0; margin:0;" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10,0,0,0" id="swf0"			width="' + w + '"			height="' + h + '" align="middle">		<param name="allowScriptAccess" value="sameDomain">		<param name="flashVars" value="none">		<param name="allowFullScreen" value="false">		<param name="bgcolor" value="#FFF">		<param name="movie" value="' + sPath + '">		<param name="quality" value="hight">		<embed style="padding:0px; margin:0px;"  src="' + sPath + '" quality="hight" bgcolor="#FFF" 			flashvars="" 			name="swfKa" 			id="swfKa" 			allowscriptaccess="sameDomain" 			allowfullscreen="true"			type="application/x-shockwave-flash"			pluginspage="http://www.macromedia.com/go/getflashplayer" width="' + w + '" height="' + h + '" >		</object>';
+	var s = '<embed style="margin:auto;"  src="' + sPath + '" quality="high" bgcolor="#000"	flashvars="" name="swfKa"\
+			id="swfKa" allowscriptaccess="sameDomain" allowfullscreen="sameDomain" type="application/x-shockwave-flash"\
+			align="middle"\
+			pluginspage="http://www.macromedia.com/go/getflashplayer"\
+			width="' + w + '" height="' + h + '"  />';
 	return s;
 }
 function onKeyUp(evt) {
@@ -355,6 +362,9 @@ function onKeyUp(evt) {
 			case 79:
 				onClickSelectSwfFile();
 				break;
+			case 82:
+				onClickRememberFullscreenMenu();
+				break;
 			case 81:
 				onClickExitMenu();
 				break;
@@ -365,16 +375,29 @@ function onKeyUp(evt) {
 		exitFromFullscreen();
 	}
 }
+
+function onClickRememberFullscreenMenu() {
+	setFSOptionForSelectedMovie(true);
+}
+function onClickForgetFullscreenMenu() {
+	setFSOptionForSelectedMovie(false);
+}
+function setFSOptionForSelectedMovie(v) {
+	if (!window.swfPath) {
+		return;
+	}
+	var oInfo = RecentFileInfo.getFileInfo(window.swfPath);
+	if (oInfo && oInfo.w) {
+		oInfo.fs = v;
+		RecentFileInfo.setFileInfo(window.swfPath, oInfo);
+	}
+}
+
 function exitFromFullscreen(){
 	window.mainMenuIsHide = false;
 	Qt.showMainMenu();
 	Qt.showNormal();
 	window.swfPath;
-	var o = RecentFileInfo.getFileInfo(window.swfPath);
-	if (o.w) {
-		o.fs = false;
-		RecentFileInfo.setFileInfo(window.swfPath, o);
-	}
 }
 function onClickShowFullscreen(bSaveFullscreenInSetting){
 	bSaveFullscreenInSetting = String(bSaveFullscreenInSetting) == 'undefined' ? true : false;
@@ -382,11 +405,7 @@ function onClickShowFullscreen(bSaveFullscreenInSetting){
 	Qt.hideMainMenu();
 	Qt.showFullScreen();
 	if (bSaveFullscreenInSetting) {
-		var oInfo = RecentFileInfo.getFileInfo(window.swfPath);
-		if (oInfo.w) {
-			oInfo.fs = true;
-			RecentFileInfo.setFileInfo(window.swfPath, oInfo);
-		}
+		rememberFullscreen();
 	}
 }
 function onClickExitMenu() {
